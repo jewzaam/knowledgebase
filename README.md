@@ -86,7 +86,6 @@ This project's discoveries live in the [Knowledgebase](https://github.com/jewzaa
 | Doc | Description |
 |---|---|
 | [Readiness Probes](observability/readiness-probes.md) | Why mission-capability vs dependency split matters (ServiceMonitor scrape gaps) |
-| [Exposition Format Consumption](observability/exposition-format-consumption.md) | `prometheus_client` emits floats; shell scraper truncation rule |
 
 ## [Python](python/)
 

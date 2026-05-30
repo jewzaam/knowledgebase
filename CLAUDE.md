@@ -84,7 +84,6 @@ When adding a new knowledgebase doc:
 ## Observability
 
 - [observability/readiness-probes.md](observability/readiness-probes.md) — why mission-capability vs dependency split matters (ServiceMonitor scrape gaps)
-- [observability/exposition-format-consumption.md](observability/exposition-format-consumption.md) — `prometheus_client` emits counters/timestamps with `.0` float suffix; shell scraper truncation rule
 
 ## Python
 
