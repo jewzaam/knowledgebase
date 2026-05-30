@@ -29,8 +29,6 @@ EXCLUDED_EXACT = {
     "ANALYSIS.md",
     "LICENSE",
     "Makefile",
-    "PLAN.md",
-    "TODO.md",
     "pyproject.toml",
 }
 
