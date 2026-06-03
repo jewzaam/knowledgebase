@@ -65,6 +65,11 @@ When adding a new knowledgebase doc:
 
 - [common/git-remote-discovery.md](common/git-remote-discovery.md) — why `origin`/`upstream` are conventions not contracts
 
+## Containers
+
+- [containers/openshell.md](containers/openshell.md) — OpenShell proxy architecture (HTTP/1.1 CONNECT, no gRPC), host.containers.internal resolution
+- [containers/podman-rootless-networking.md](containers/podman-rootless-networking.md) — pasta TAP vs interface-copy mode, rootless-netns debugging, bridge data path, pasta version regressions
+
 ## .NET
 
 - [dotnet/nina-plugin.md](dotnet/nina-plugin.md) — NINA 3.x C# plugin: build, MEF, mediators, options, HTTP, logging, publishing
