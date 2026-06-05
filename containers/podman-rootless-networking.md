@@ -69,6 +69,23 @@ The masquerade step is critical:
 
 Docker iptables rules do NOT interfere with rootless podman. Tested by stopping Docker, flushing DOCKER-* iptables chains, setting FORWARD policy to ACCEPT, and disabling firewalld. Rootless podman bridge networking failure persisted through all of these changes. The issue is internal to the rootless-netns (pasta TAP mode), not in the host's firewall rules.
 
+## Network Interface Switch Invalidates Rootless-netns
+
+When the host switches network interfaces (e.g., wired ethernet to wifi, or vice versa), existing rootless podman bridge networking breaks silently. Containers may show as running and even report healthy, but the supervisor/application inside cannot reach the host because pasta's rootless-netns was configured for the previous interface.
+
+The rootless-netns retains the old interface configuration (routes, ARP, pasta TAP/copied interface) and does not auto-detect the switch.
+
+Symptom: sandboxes show "Ready" phase but connections time out or fail with "failed to connect."
+
+Fix: kill the pasta process, remove the rootless-netns directory, restart podman socket, then restart containers. Podman recreates the rootless-netns with the current active interface on the next container start.
+
+```bash
+kill $(cat /run/user/$(id -u)/containers/networks/rootless-netns/rootless-netns-conn.pid)
+rm -rf /run/user/$(id -u)/containers/networks/rootless-netns/
+systemctl --user restart podman.socket
+podman start <container_name>
+```
+
 ## Libvirt VM Networking with Docker
 
 Docker's iptables rules block libvirt VM traffic on virbr0. Fix:
@@ -82,3 +99,15 @@ sudo firewall-cmd --zone=FedoraWorkstation --add-masquerade
 ```
 
 These rules must be re-applied after every Docker restart or system reboot.
+
+## OpenShell Sandbox JWT Expiry
+
+OpenShell sandbox containers authenticate to the gateway using a JWT minted at creation time with a 1-hour TTL (`ttl_secs=3600` in gateway config). After a gateway restart or when more than 1 hour has elapsed, the token expires. The supervisor inside the container fails with `Unauthenticated: invalid token: ExpiredSignature` and exits after 5 retries, killing the container.
+
+The token is bind-mounted from `~/.local/state/openshell/podman-sandbox-tokens/<sandbox-id>/sandbox.jwt` on the host.
+
+Re-minting is possible: the gateway's Ed25519 signing key lives at `.cache/gateway-podman/tls/jwt/signing.pem` (dev mode). The JWT claims structure requires: `sub` (SPIFFE URI `spiffe://openshell/sandbox/<uuid>`), `iss` and `aud` (both `openshell-gateway:<gateway_id>`), `iat`, `exp`, and crucially `sandbox_id` (the UUID denormalized from sub — missing this field causes `missing field sandbox_id` validation error).
+
+The gateway has a `RefreshSandboxToken` RPC for token renewal, but it requires a valid (non-expired) token to authenticate the request — chicken-and-egg when the token is already expired. No CLI command exists to re-mint tokens. Writing a fresh token to the bind-mounted host file and restarting the container is the current workaround.
+
+Signing keys are preserved across `mise run gateway` restarts (`generate-certs` skips if PKI files already exist), so re-minted tokens using the same signing key are valid. But the TTL makes any sandbox token stale after 1 hour regardless.

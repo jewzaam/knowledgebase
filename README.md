@@ -59,6 +59,7 @@ This project's discoveries live in the [Knowledgebase](https://github.com/jewzaa
 
 | Doc | Description |
 |---|---|
+| [gdbus GVariant Escaping](common/gdbus-gvariant-escaping.md) | gdbus GVariant double-escaping of quotes in D-Bus extension output, JSON parsing fix |
 | [Git Remote Discovery](common/git-remote-discovery.md) | Why `origin`/`upstream` are conventions not contracts |
 
 ## [Containers](containers/)

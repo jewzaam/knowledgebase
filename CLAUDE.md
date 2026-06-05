@@ -63,6 +63,7 @@ When adding a new knowledgebase doc:
 
 ## Common
 
+- [common/gdbus-gvariant-escaping.md](common/gdbus-gvariant-escaping.md) — gdbus GVariant double-escaping of quotes in D-Bus extension output, JSON parsing fix
 - [common/git-remote-discovery.md](common/git-remote-discovery.md) — why `origin`/`upstream` are conventions not contracts
 
 ## Containers
