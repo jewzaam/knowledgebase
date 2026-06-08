@@ -173,6 +173,10 @@ Agent activity detectable via `query_source` values starting with `agent:`.
 
 Sessions running long agent calls (up to 98 minutes observed) emit no main-thread events, but subagent events (query_source=agent:*) continue flowing at ~77 events/min. Treat any event (main or subagent) as proof of session activity.
 
+## Latency Characteristics
+
+**SDK flush interval**: Claude Code's OTEL SDK batches events before flushing to the collector. The flush interval is internal to Claude Code and not user-configurable. Observed contribution to state detection latency: 10-15 seconds. This is the dominant bottleneck in Loki recording rule → Prometheus pipelines when used for real-time session state detection.
+
 ## Related Documentation
 
 - [hook-state-transitions.md](hook-state-transitions.md) — hook event types and state machines from the hook perspective
