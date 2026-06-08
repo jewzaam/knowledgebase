@@ -60,6 +60,7 @@ When adding a new knowledgebase doc:
 - [claude-code/oauth-tokens.md](claude-code/oauth-tokens.md) — Anthropic OAuth token taxonomy, endpoint compatibility, error-envelope quirks, K8s Secret tmpfs reset
 - [claude-code/plugins.md](claude-code/plugins.md) — plugin caching, env vars, marketplace mechanics
 - [claude-code/skills.md](claude-code/skills.md) — permission enforcement detail, shell injection mechanics
+- [claude-code/otel-native-telemetry.md](claude-code/otel-native-telemetry.md) — native OTEL event types, labels, query_source taxonomy, session state derivation signals
 
 ## Common
 
@@ -90,6 +91,7 @@ When adding a new knowledgebase doc:
 ## Observability
 
 - [observability/readiness-probes.md](observability/readiness-probes.md) — why mission-capability vs dependency split matters (ServiceMonitor scrape gaps)
+- [observability/loki-recording-rules.md](observability/loki-recording-rules.md) — LogQL recording rule gotchas: timestamp comparison, count_over_time grouping, ruler remote_write config format
 
 ## Python
 
