@@ -2,6 +2,8 @@
 
 When calling GNOME Shell D-Bus extensions via `gdbus call`, the output wraps return values in GVariant syntax: `('json_string',)`. Inside that string, any literal double quotes in the data (e.g., a window title containing `"Hamnet"`) are double-escaped as `\\"`.
 
+**GVariant wrapper format variation**: gdbus output can use either single-quote wrapper `('json_string',)` or double-quote wrapper `("json_string",)`. Both formats observed in production on Fedora. The double-quote format uses single-escaping (`\"` → `"`), unlike the single-quote format which double-escapes (`\\"` → `\"`). Parsers must handle both wrapper formats and their respective escaping conventions. A unified unescape of `\"` → `"` works for both cases.
+
 If you strip the GVariant wrapper and feed the inner string directly to `json.loads()`, the double-escaped quotes (`\\"`) produce invalid JSON — the parser sees a literal backslash followed by a quote instead of an escaped quote.
 
 ## Fix
