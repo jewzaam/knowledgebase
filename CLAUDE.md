@@ -96,3 +96,4 @@ When adding a new knowledgebase doc:
 ## Python
 
 - [python/cross-platform.md](python/cross-platform.md) — Microsoft Store alias mechanism; Smart App Control blocking pip .exe shims
+- [python/tkinter.md](python/tkinter.md) — Tkinter menu keyboard shortcuts: underline parameter is visual only, XWayland focus issues, bind_all() requirement
