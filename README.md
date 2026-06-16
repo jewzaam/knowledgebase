@@ -102,6 +102,7 @@ This project's discoveries live in the [Knowledgebase](https://github.com/jewzaa
 | Doc | Description |
 |---|---|
 | [Cross-Platform](python/cross-platform.md) | Microsoft Store alias mechanism; SAC blocks pip .exe shims |
+| [Tkinter](python/tkinter.md) | Menu keyboard shortcuts: underline parameter is visual only, XWayland focus issues, bind_all() requirement |
 
 ## Guiding Principles
 
