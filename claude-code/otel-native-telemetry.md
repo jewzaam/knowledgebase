@@ -52,6 +52,10 @@ Labels:
 
 - `prompt_length` — length of submitted prompt
 
+Structured metadata fields:
+
+- `prompt` — full prompt text as submitted to the model (see user_prompt field structure below)
+
 ### Hook Events
 
 **`hook_execution_start`** / **`hook_execution_complete`** — command hook fired
@@ -168,6 +172,31 @@ Native events enable session state derivation:
 | AWAITING_INPUT | inferred from READY + prolonged absence |
 
 Agent activity detectable via `query_source` values starting with `agent:`.
+
+## user_prompt Field Structure
+
+The `prompt` structured metadata field on `user_prompt` events contains the full prompt as submitted to the model, including system-injected XML blocks. User-typed text is never wrapped in XML tags.
+
+System-injected XML blocks include:
+
+- `<system-reminder>` — context, rules, CLAUDE.md content
+- `<task-notification>` — background agent completion notifications
+- `<local-command-caveat>` — warnings about command behavior
+- `<command-name>`, `<command-message>`, `<command-args>` — slash command invocation details
+- `<local-command-stdout>` — command output
+
+To extract user-typed input: strip all XML blocks (`<tag>...</tag>`) and orphan tags. No tag allowlist needed — user input never appears inside tags.
+
+### task-notification Events
+
+Background agent completions trigger auto-wake cycles: SubagentStop → UserPromptSubmit → Stop. Each auto-wake generates a `user_prompt` event whose `prompt` field is entirely a `<task-notification>` XML block containing:
+
+- `<task-id>` — agent task identifier
+- `<summary>` — one-line task summary
+- `<result>` — agent output
+- `<usage>` — token/cost usage stats
+
+In agent-heavy sessions (parallel background agents), `user_prompt` streams can be dominated by task-notification events. Observed: 11 of 12 prompts in a cited-research session were task-notifications, with `prompt_length` up to 14,766 characters. A single session can generate 10+ consecutive task-notification prompts with no user-typed prompt between them.
 
 ## Long-Running Operations
 
