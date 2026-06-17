@@ -103,3 +103,26 @@ sum by (session_id, hook_event) (count_over_time({job="claude-code-events"} | ev
 ```
 
 This groups hook execution counts by session and hook event type over a 7-day range.
+
+### Cross-Stream Ordering
+
+Loki `direction=backward` orders log entries within each stream but does NOT guarantee ordering across streams.
+
+When structured metadata fields (e.g., `prompt`, `cost_usd`) create unique streams per event (each event has different metadata values, resulting in different stream identity), the result array order is arbitrary across those streams.
+
+Application code must sort by `observed_timestamp` after receiving results that span multiple streams. Example from [claude-dashboard](https://github.com/jewzaam/claude-dashboard) tooltip polling: events with unique `prompt` values form separate streams, requiring client-side timestamp sorting before processing the result array.
+
+## Recording Rule Event Filtering
+
+### Sub-Agent Permission Bleed
+
+Recording rules that track permission state must filter by `query_source` to avoid sub-agent event interference.
+
+The `claude_session_permission` rule (in [claude-otel-stack](https://github.com/jewzaam/claude-otel-stack)) compares `PermissionRequest` timestamp vs latest `tool_result|user_prompt` timestamp. Sub-agent events share the parent session's `session_id`. A background agent's `tool_result` events can have timestamps newer than the main thread's `PermissionRequest`, causing the rule to evaluate FALSE and clear permission state while the main thread is still blocked on a permission prompt.
+
+Fix: filter the clearing side to `query_source = "repl_main_thread"` so only main-thread events can clear permission state.
+
+This issue is specific to permission tracking. The `claude_session_working` and `claude_session_ready` rules do NOT require this filter:
+
+- **`claude_session_working`**: sub-agent events contributing to WORKING state is correct (work is happening in the session)
+- **`claude_session_ready`**: correctly blocked by agent activity; auto-wake Stop hook resolves it when agents finish
