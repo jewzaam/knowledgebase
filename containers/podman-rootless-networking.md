@@ -1,6 +1,6 @@
 # Rootless Podman Networking
 
-Verified: 2026-06-03  
+Verified: 2026-06-29  
 Provenance: <https://github.com/NVIDIA/OpenShell>
 
 Rootless podman uses pasta (from the passt project) to provide network namespace connectivity without requiring root privileges. Pasta translates between L2/L3 in the rootless network namespace and L4 sockets on the host.
@@ -64,6 +64,21 @@ The masquerade step is critical:
 
 - If the outgoing interface is tap0 (169.254.2.1), the masqueraded source is link-local, which breaks pasta.
 - If it's a copied real interface (e.g., 192.168.x.x), the source is routable and pasta handles it correctly.
+
+## host.containers.internal Behavior in Bridge Networks
+
+`host.containers.internal` resolves correctly to `169.254.1.2` from rootless podman containers on custom bridge networks (verified June 2026 on Fedora with passt-0^20250919). This works even though the bridge gateway IP (e.g., `10.89.1.1` from `podman network inspect`) does NOT route back to the host — curl to the gateway IP hangs indefinitely.
+
+**Practical implication**: For container-to-host communication (e.g., a containerized worker calling a host-side API), use `http://host.containers.internal:<port>` or map via `extra_hosts` in compose:
+
+```yaml
+services:
+  worker:
+    extra_hosts:
+      - "myhost:host-gateway"  # maps myhost → 169.254.1.2
+```
+
+This provides a stable DNS name (`http://myhost:<port>`) for container→host calls. Never use the bridge gateway IP — it doesn't route to the host in rootless podman.
 
 ## Docker and Rootless Podman Isolation
 
