@@ -1,6 +1,6 @@
 # OpenShell Sandbox Internals
 
-Verified: 2026-06-12  
+Verified: 2026-07-31  
 Provenance: <https://github.com/jewzaam/openshell-sandbox>
 
 OpenShell is a sandboxing tool that wraps container runtimes (podman, docker) with network and filesystem policies. Used for running untrusted code (e.g., Claude Code auto mode) with L4/L7 network filtering and Landlock filesystem restrictions.
@@ -29,6 +29,10 @@ The `host` field in network policy rejects:
 Only subdomain-scoped wildcards (`*.example.com`) are accepted. No mechanism for open web egress exists in current OpenShell.
 
 `openshell policy set` returns exit 0 immediately. Validation happens asynchronously. A policy can fail L7 validation after the command returns successfully. Check status via `openshell policy list <name>` — look for `Failed`/`Loaded`/`Effective` in the status column. Failed policies do not replace the previous effective policy.
+
+### Policy Granularity
+
+Network policy operates at host+port level only. No URL path filtering, no HTTP verb filtering. The L7 CONNECT proxy establishes a TLS tunnel; once up, it cannot inspect HTTP methods or paths inside the tunnel. The `access` field values (`read-only`, `full`) are OpenShell's own access tier concept, not HTTP GET vs POST filtering.
 
 ## Exec Session Stability
 
@@ -80,3 +84,22 @@ START_NS=$(python3 -c "import time; print(int((time.time() - 30*24*3600) * 1e9))
 ```
 
 Structured metadata fields (e.g., `event_name`, `session_id`, `cost_usd`, `model`, `query_source`) work as filter targets in LogQL from inside the sandbox, consistent with the [otel-native-telemetry](https://github.com/jewzaam/knowledgebase/blob/main/claude-code/otel-native-telemetry.md) documentation.
+
+## Container Identification
+
+OpenShell sandbox containers use labels for identification:
+
+- `openshell.ai/sandbox-name` — user-facing sandbox name
+- `openshell.ai/sandbox-id` — UUID assigned by OpenShell
+
+Container names follow the pattern `openshell-default--<sandbox-name>-<sandbox-uuid>` but should not be hardcoded. Use label-based lookup via `podman ps -a --format json | jq` filtering on the `openshell.ai/sandbox-name` label.
+
+## Sandbox JWT Token Delivery
+
+Tokens are NOT bind-mounted from the host. The JWT lives at `/etc/openshell/auth/sandbox.jwt` inside the container overlay (not a writable volume). `OPENSHELL_SANDBOX_TOKEN_FILE` env var points there.
+
+`podman cp` can write to the overlay on a stopped container; the change persists until the container is removed. `podman restart` resets the overlay — must stop, cp, then start (not restart).
+
+## Gateway Dev Script Config Override
+
+`tasks/scripts/gateway.sh` in the OpenShell repo writes `ttl_secs = 3600` into the generated `gateway.toml` on every `mise run gateway`. Commit `e4bcfdfa` changed the compiled code default in `defaults.rs` from 3600 to 0 (no expiry) for local single-player gateways, but the script hardcodes the old value. The fix at the code level never takes effect because the script-generated config overrides it. Fix: change `ttl_secs = 3600` to `ttl_secs = 0` in `tasks/scripts/gateway.sh` line 330.

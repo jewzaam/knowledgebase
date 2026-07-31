@@ -65,6 +65,7 @@ When adding a new knowledgebase doc:
 ## Common
 
 - [common/atlassian-api-auth.md](common/atlassian-api-auth.md) — Atlassian API token types, scoping, URL routing, auth methods, and network policy granularity
+- [common/commit-conventions.md](common/commit-conventions.md) — commit type taxonomy evolution from AngularJS through Angular to Conventional Commits; why `chore` and `style` persist despite Angular dropping them
 - [common/gdbus-gvariant-escaping.md](common/gdbus-gvariant-escaping.md) — gdbus GVariant double-escaping of quotes in D-Bus extension output, JSON parsing fix
 - [common/git-remote-discovery.md](common/git-remote-discovery.md) — why `origin`/`upstream` are conventions not contracts
 
