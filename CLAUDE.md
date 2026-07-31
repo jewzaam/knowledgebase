@@ -61,6 +61,7 @@ When adding a new knowledgebase doc:
 - [claude-code/plugins.md](claude-code/plugins.md) — plugin caching, env vars, marketplace mechanics
 - [claude-code/skills.md](claude-code/skills.md) — permission enforcement detail, shell injection mechanics
 - [claude-code/otel-native-telemetry.md](claude-code/otel-native-telemetry.md) — native OTEL event types, labels, query_source taxonomy, session state derivation signals
+- [claude-code/workflow-structured-output.md](claude-code/workflow-structured-output.md) — Workflow tool `args` global failure, `agent(schema:)` StructuredOutput mechanism, Ajv validation, schema constraint support matrix
 
 ## Common
 
