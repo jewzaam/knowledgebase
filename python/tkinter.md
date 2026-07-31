@@ -49,3 +49,51 @@ def show_popup_menu(event):
 
 The `underline` parameter remains useful for visual consistency, but treat it
 as decoration only. Functional keyboard shortcuts need explicit bindings.
+
+## Unicode Rendering
+
+Tkinter on Linux (with Noto Sans or similar fonts) cannot render Unicode
+characters above U+FFFF (supplementary plane). Characters like 🔄 (U+1F504)
+and 🎤 (U+1F3A4) appear as empty boxes or are invisible. BMP characters
+(U+0000–U+FFFF) render correctly — e.g., ⚙ (U+2699), ◀ (U+25C0), ↻ (U+21BB).
+
+Workaround: use BMP equivalents for all button and label text. The
+supplementary-plane limitation appears specific to Tkinter's font rendering
+path on Linux; the same characters may work in terminal output or other GUI
+toolkits.
+
+## Canvas Scroll Events
+
+When a `tk.Canvas` uses `create_window()` to embed a `tk.Frame` containing
+child widgets (Labels, Buttons), the canvas itself never receives mouse events
+like `<Button-4>` and `<Button-5>` (scroll). The child widgets consume the
+events before the canvas sees them.
+
+This breaks the common "scrollable frame via canvas" pattern for mousewheel
+scrolling. Options:
+
+1. Bind scroll handlers to every child widget recursively
+2. Switch to a `tk.Text` widget with `window_create()`, which handles scrolling
+   natively
+
+The Text widget approach is more robust — it was designed for embedded widgets
+and has built-in scroll coordination.
+
+## ttk.Notebook Scroll-to-Change-Tab
+
+`ttk.Notebook` has built-in behavior that changes the selected tab when the
+user scrolls (Button-4/Button-5 on Linux, MouseWheel on Windows). This fires
+even when the scroll event originates on a child widget inside a tab, causing
+unexpected tab switches when the user is trying to scroll content within the
+tab.
+
+Disable with:
+
+```python
+notebook.bind("<Button-4>", lambda e: "break")
+notebook.bind("<Button-5>", lambda e: "break")
+notebook.bind("<MouseWheel>", lambda e: "break")
+```
+
+The `"break"` return value stops event propagation, preventing the notebook
+from processing the scroll as a tab-change command.
