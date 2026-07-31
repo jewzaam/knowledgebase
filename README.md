@@ -55,6 +55,7 @@ This project's discoveries live in the [Knowledgebase](https://github.com/jewzaa
 | [Plugins](claude-code/plugins.md) | Plugin caching behavior, env vars, marketplace mechanics |
 | [OTEL Native Telemetry](claude-code/otel-native-telemetry.md) | Native OTEL event types, labels, query_source taxonomy, session state derivation signals |
 | [Skills](claude-code/skills.md) | Permission enforcement detail, shell injection mechanics |
+| [Workflow Structured Output](claude-code/workflow-structured-output.md) | Workflow `args` global failure, `agent(schema:)` mechanism, Ajv validation, schema constraints |
 
 ## [Common](common/)
 
