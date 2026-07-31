@@ -83,6 +83,16 @@ Labels:
 
 **`subagent_completed`** — subagent finished execution
 
+Labels:
+
+- `model` — requested model (e.g., `claude-sonnet-4-5@20250929`)
+- `final_model` — actual model used (may differ if swapped)
+- `duration_ms` — total agent execution time
+- `is_async` — boolean, whether the agent ran in the background
+- `agent_type` — agent type (e.g., `general-purpose`, `superpowers:code-reviewer`)
+- `agent_source` — source of the agent dispatch
+- `model_swapped` — present (truthy) when the final model differs from the requested model
+
 ### Infrastructure Events
 
 **`plugin_loaded`** — plugin loaded at startup
@@ -160,6 +170,23 @@ Query patterns:
 - Filter: `{service_name="claude-code"} | field="value"`
 - Unwrap: works on numeric structured metadata fields
 
+### Query Endpoint Requirements
+
+Loki's instant query endpoint (`/loki/api/v1/query`) rejects log queries with "log queries are not supported as an instant query type, please change your query to a range query type." Must use `/loki/api/v1/query_range` with appropriate `start`/`end` parameters or rely on Loki's default range. Use `-G` with `--data-urlencode` for proper LogQL encoding.
+
+Example:
+
+```bash
+curl -s --max-time 10 -G 'http://host.containers.internal:3100/loki/api/v1/query_range' \
+  --data-urlencode 'query={service_name="claude-code"} | event_name="subagent_completed"' \
+  --data-urlencode 'limit=50' \
+  --data-urlencode 'direction=forward'
+```
+
+## Sandbox Loki Access
+
+From inside an OpenShell sandbox, Loki is reachable at `host.containers.internal:3100`. The `loki:3100` hostname resolves but GET requests are blocked by sandbox network policy (`{"detail":"GET loki:3100/... not permitted by policy","error":"policy_denied"}`). The `host.containers.internal` route bypasses this because it goes through the podman host network bridge. This is the primary access pattern for querying OTEL data from within a sandbox session.
+
 ## Session State Detection
 
 Native events enable session state derivation:
@@ -205,6 +232,17 @@ Sessions running long agent calls (up to 98 minutes observed) emit no main-threa
 ## Latency Characteristics
 
 **SDK flush interval**: Claude Code's OTEL SDK batches events before flushing to the collector. The flush interval is internal to Claude Code and not user-configurable. Observed contribution to state detection latency: 10-15 seconds. This is the dominant bottleneck in Loki recording rule → Prometheus pipelines when used for real-time session state detection.
+
+## Agent Orchestration Debugging
+
+To diagnose why an orchestrator agent terminated before all sub-agents completed:
+
+1. Query `subagent_completed` events sorted by `event_timestamp` to build a timeline of which agents finished and when
+2. Filter orchestrator's own API calls with `query_source="agent:custom"` to see its token usage, stop_reason, and when it last emitted
+3. Compare timestamps: if `subagent_completed` events appear AFTER the orchestrator's last `api_request`, those agents finished after the orchestrator was collected
+4. The `is_async=true` vs `is_async=false` distinction shows which agents were background vs foreground
+
+This pattern reveals agent lifecycle issues where background agents complete after their parent has already been garbage collected.
 
 ## Related Documentation
 
