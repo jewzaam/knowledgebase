@@ -8,47 +8,26 @@ Claude Code's internal Workflow executor.
 > [standards/claude-code/](https://github.com/jewzaam/standards/blob/main/claude-code/)
 > (when that doc exists).
 
-## Workflow `args` global is broken
+## Workflow `args` is double-serialized
 
-The Workflow tool accepts an `args` parameter that should be exposed as a global
-object in the script runtime. **This does not work.** Testing with both inline
-`script` and `scriptPath` configurations shows `args` is completely undefined
-inside the executed code.
+The Workflow tool serializes `args` as a **JSON string**, not a native object.
+`typeof args === "string"`. Direct property access (`args.dimensions`) fails
+with `undefined` because you're reading a property of a string.
 
-**Observed failure:**
-
-```javascript
-// Workflow call with args
-Workflow({
-  script: "console.log(args.dimensions.length)",
-  args: { dimensions: ["x", "y", "z"] }
-})
-
-// Runtime error:
-// ReferenceError: args is not defined
-```
-
-**HTML entity encoding observed:** When inspecting serialized values in error
-traces, `args` content appears mangled with HTML entity encoding (`&amp;` for
-`&`), suggesting corruption in the args delivery pipeline before it reaches the
-script executor.
-
-**Workaround:** Embed all configuration as `const` literals directly in the
-script body. Do not rely on the `args` parameter for any production Workflow
-calls.
+**Fix:** `JSON.parse(args)` at the top of the script recovers the original object.
 
 ```javascript
-// Instead of args, inline everything
-Workflow({
-  script: `
-    const dimensions = ["x", "y", "z"];
-    console.log(dimensions.length);
-  `
-})
+const config = JSON.parse(args)
+console.log(config.dimensions.length)  // works
 ```
 
-This is a Claude Code bug, not a usage error. The tool documentation claims
-`args` is available, but the runtime doesn't provide it.
+Earlier observations that `args` was "completely undefined" were caused by
+treating the string as an object — `"string".dimensions` is `undefined`, not a
+`ReferenceError`. The `args` global IS available; its value is a JSON string.
+
+**HTML entity encoding:** Enum values containing `&` (e.g., `Architecture & Design`)
+get entity-encoded to `&amp;` during serialization. Avoid `&` in values passed
+through args. Use `and` instead.
 
 ## `agent(schema:)` mechanism
 
@@ -100,54 +79,53 @@ don't reconstruct it each iteration.
   from a skill or main-thread agent, dispatch a Workflow or use the Agent SDK
   directly.
 
-## Schema constraints: supported vs. unsupported
+## Schema constraints: tested support matrix
 
-Not all JSON Schema features work with `StructuredOutput`. Some cause errors at
-schema compilation time, some are silently stripped by the SDK, and some are
-unsupported by the underlying tool-use mechanism.
+All constraints tested July 2026 via Workflow `agent(schema:)` with Haiku and
+Sonnet models. Results contradict earlier documentation that claimed many
+constraints were unsupported.
+
+### Supported (tested, confirmed working)
+
+| Constraint | Notes |
+|---|---|
+| `pattern` | Regex on strings. Works. Earlier claim of 400 error was wrong. |
+| `minLength` / `maxLength` | String length bounds. Works. |
+| `minimum` / `maximum` | Numeric bounds. Works. |
+| `minProperties` | Object size minimum. Works. |
+| `if` / `then` / `else` | Conditional schemas. Works at root and nested. |
+| `not` | Negation. Works (tested nested inside `allOf` inside array items). |
+| `allOf` (nested) | Works inside properties and array items. |
+| `enum` | Primitive values only. Works. |
+| `const` | Works. |
+| `additionalProperties: false` | Works and recommended. |
+| `required` | Works. |
+| `$ref` / `$defs` | Internal references only (no external URLs). Works. |
 
 ### Unsupported (causes 400 error)
 
-- **`pattern` (string regex):** Returns 400 error with message "string patterns
-  are not supported". The Anthropic API's tool-use validation does not support
-  regex constraints.
+| Constraint | Error | Notes |
+|---|---|---|
+| `allOf` at schema root | `input_schema does not support oneOf, allOf, or anyOf at the top level` | Move composition inside a property or array items. |
+| `anyOf` at schema root | Same 400 error | Same workaround. |
+| `oneOf` at schema root | Same 400 error | Same workaround. |
+| Recursive schemas | Not supported | Schemas with `$ref` cycles. |
 
-- **`if/then/else/not` (conditional schemas):** Undocumented but likely
-  unsupported. Avoid conditional logic in schemas intended for
-  `StructuredOutput`.
+### Not tested
 
-### Silently stripped by SDK (client-side validation only)
-
-These constraints are removed from the schema before sending to the API, so the
-model never sees them. However, client-side Ajv validation still enforces them
-— if the model violates the constraint, validation fails and triggers a retry.
-
-- `minimum`, `maximum`, `multipleOf` (numeric bounds)
-- `minLength`, `maxLength` (string length)
-- `minProperties`, `maxProperties` (object size)
-
-The model doesn't know these rules exist, so it can't bias toward satisfying
-them — it just gets retry feedback when it guesses wrong.
-
-### Not supported
-
-- **Recursive schemas:** Schemas with `$ref` cycles or unbounded nesting are
-  not supported.
+- `multipleOf` (numeric)
+- `maxProperties`
+- Complex array constraints (`maxItems`, `uniqueItems`)
+- `format` keyword enforcement
+- Schemas exceeding ~50 properties / ~8KB
 
 ### Complexity limits
 
-Large schemas (~50+ properties, ~8KB serialized) can trigger "compiled grammar
-is too large" errors. The Anthropic API compiles the schema into a constrained
-grammar for tool-use validation. This grammar has a state-space explosion
-problem with optional parameters — each optional field roughly doubles the
-grammar size.
+Large schemas (~50+ properties, ~8KB serialized) may trigger "compiled grammar
+is too large" errors. Each optional parameter roughly doubles grammar state
+space. 180-second server-side compilation timeout.
 
-**Timeout:** Schema compilation has a 180-second server-side timeout. Complex
-schemas can hit this and fail the request.
-
-**Mitigation:** Keep schemas small. Use `required` for most fields to reduce
-optional combinatorics. Split large output shapes across multiple
-`agent(schema:)` calls if needed.
+**Mitigation:** Use `required` for most fields to reduce optional combinatorics.
 
 ## Verified against
 
