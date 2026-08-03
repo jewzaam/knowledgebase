@@ -100,6 +100,17 @@ Tokens are NOT bind-mounted from the host. The JWT lives at `/etc/openshell/auth
 
 `podman cp` can write to the overlay on a stopped container; the change persists until the container is removed. `podman restart` resets the overlay — must stop, cp, then start (not restart).
 
+## Sandbox Profiles
+
+`sandbox.sh --profile <name>` controls which credentials, env vars, and network policy a sandbox receives. Profile stored in `manifest.json` so `--refresh` inherits it without re-specifying.
+
+| Profile | Auth | Env var groups | Network policy | Skipped uploads | OTEL |
+|---------|------|----------------|----------------|-----------------|------|
+| (none/default) | Vertex AI | all groups | `code.yaml` | none | push + Prometheus/Loki read |
+| `personal` | `ANTHROPIC_API_KEY` | ANTHROPIC + CLAUDE + OTEL only | `personal.yaml` | gcloud, gws | push-only, tagged `sandbox.profile=personal` |
+
+Personal profile also strips Jira and Prometheus/Loki sections from the sandbox system prompt (`config/sandbox-claude.md`) at upload time. The OTEL collector endpoint (port 4318) is write-only by design — sandbox pushes telemetry but cannot query it — so sharing a collector between work and personal sandboxes does not leak data. Resource attribute `sandbox.profile=personal` enables Grafana filtering.
+
 ## Gateway Dev Script Config Override
 
 `tasks/scripts/gateway.sh` in the OpenShell repo writes `ttl_secs = 3600` into the generated `gateway.toml` on every `mise run gateway`. Commit `e4bcfdfa` changed the compiled code default in `defaults.rs` from 3600 to 0 (no expiry) for local single-player gateways, but the script hardcodes the old value. The fix at the code level never takes effect because the script-generated config overrides it. Fix: change `ttl_secs = 3600` to `ttl_secs = 0` in `tasks/scripts/gateway.sh` line 330.
