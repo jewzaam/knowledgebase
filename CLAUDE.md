@@ -52,6 +52,7 @@ When adding a new knowledgebase doc:
 - [build/ghcr-publish.md](build/ghcr-publish.md) — why fine-grained PATs fail, classic PAT scoping, OCI label linkage mechanics, first-publish-private behavior
 - [build/local-workflow-testing.md](build/local-workflow-testing.md) — how act works, runner image internals, security risks, runner-image differences from GitHub-hosted
 - [build/fabcheck.md](build/fabcheck.md) — fabcheck tool internals: language coverage, dist-name resolution modes, known gaps
+- [build/gitlab-container-registry.md](build/gitlab-container-registry.md) — resolving an image tag to a manifest digest via the GitLab Container Registry API
 
 ## Claude Code
 
@@ -67,6 +68,7 @@ When adding a new knowledgebase doc:
 
 - [common/atlassian-api-auth.md](common/atlassian-api-auth.md) — Atlassian API token types, scoping, URL routing, auth methods, and network policy granularity
 - [common/commit-conventions.md](common/commit-conventions.md) — commit type taxonomy evolution from AngularJS through Angular to Conventional Commits; why `chore` and `style` persist despite Angular dropping them
+- [common/crlf-wsl.md](common/crlf-wsl.md) — CRLF line endings silently break bash scripts under WSL; detection, one-off fix, and durable `.gitattributes` prevention
 - [common/gdbus-gvariant-escaping.md](common/gdbus-gvariant-escaping.md) — gdbus GVariant double-escaping of quotes in D-Bus extension output, JSON parsing fix
 - [common/git-remote-discovery.md](common/git-remote-discovery.md) — why `origin`/`upstream` are conventions not contracts
 
@@ -82,12 +84,16 @@ When adding a new knowledgebase doc:
 ## Kubernetes
 
 - [kubernetes/applicationset-safety.md](kubernetes/applicationset-safety.md) — Argo CD ApplicationSet safety defaults: `preserveResourcesOnDeletion: true` for stateful generators, `goTemplateOptions: [missingkey=error]` for Go templates
+- [kubernetes/argocd-sync-drift.md](kubernetes/argocd-sync-drift.md) — four causes of perpetual Argo CD OutOfSync: `ignoreDifferences` group-key stripping, kubeseal null-timestamp drift, Synced-vs-unchanged-resource distinction, Grafana datasource UID name-match preservation
 - [kubernetes/configmap-reload.md](kubernetes/configmap-reload.md) — why the kubelet doesn't restart Pods on CM/Secret content change; Reloader direct-mount gotcha
 - [kubernetes/gitops-polling-vs-webhooks.md](kubernetes/gitops-polling-vs-webhooks.md) — pair GitOps polling with webhooks day 1 (Argo CD, Flux)
+- [kubernetes/gui-desktop-containers.md](kubernetes/gui-desktop-containers.md) — rootless VNC/noVNC images under PSA restricted (accetto fails, kasmweb works); why a root `USER` line doesn't settle rootless capability (read the entrypoint's `id -u` branch); PixInsight installer-skip and system-package gaps
 - [kubernetes/helm-values.md](kubernetes/helm-values.md) — verify Helm value overrides with `helm template` before pushing
 - [kubernetes/image-tag-immutability.md](kubernetes/image-tag-immutability.md) — tags are build identifiers, not versions; rotate the tag or pin by digest per build (kubelet `IfNotPresent` caches by tag)
 - [kubernetes/job-sync-hooks.md](kubernetes/job-sync-hooks.md) — Jobs are immutable; use Argo CD sync hooks for delete-and-recreate
 - [kubernetes/kubectl-run-entrypoints.md](kubernetes/kubectl-run-entrypoints.md) — match `kubectl run -- <args>` to the image's ENTRYPOINT shape
+- [kubernetes/longhorn-volume-behavior.md](kubernetes/longhorn-volume-behavior.md) — thin provisioning vs scheduling reservation at op%=100; failure symptoms when nominal budget exhausted; Helm defaultSettings hot-update limitation; space reclamation via Trim Filesystem action vs in-pod fstrim (blocked by restricted PSA); ad-hoc Backup admission webhook EOF on 1.11.x
+- [kubernetes/tailscale-operator.md](kubernetes/tailscale-operator.md) — Tailscale K8s operator: ClusterIP Service exposure, port=tailnet-port mapping, port 443 for portless URLs, L4 TCP passthrough (no TLS termination)
 - [kubernetes/podsecurity-restricted-pod.md](kubernetes/podsecurity-restricted-pod.md) — admission-rejection wall-of-text format and why it surfaces only at admission
 - [kubernetes/resource-limits.md](kubernetes/resource-limits.md) — CFS bandwidth controller throttling mechanics; why CPU limits hurt
 
