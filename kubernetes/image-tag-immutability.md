@@ -53,13 +53,12 @@ invalidate the kubelet cache.
 
 ## Concrete failure mode
 
-setup-k3s deployed `ghcr.io/jewzaam/claude-quota-exporter:0.1.0` from a
+A cluster deployed `ghcr.io/jewzaam/claude-quota-exporter:0.1.0` from a
 build that predated a refactor commit. The operator rebuilt the image,
 re-pushed `:0.1.0`, and waited for the rollout. In-cluster pods kept
 running the old code because the cached `:0.1.0` digest satisfied
 `IfNotPresent`. Acceptance criteria for the workload deploy failed
-verification until the tag was rotated. Source:
-<https://github.com/jewzaam/setup-k3s>.
+verification until the tag was rotated.
 
 ## `imagePullPolicy: Always` is not the answer
 
@@ -107,7 +106,6 @@ pin digests instead.
 
 ## Provenance
 
-Rule surfaced while verifying acceptance criteria for the
-`claude-quota-exporter` workload deploy in
-<https://github.com/jewzaam/setup-k3s>. Re-pushing `:0.1.0` after a
+Rule surfaced while verifying acceptance criteria for a
+`claude-quota-exporter` workload deploy. Re-pushing `:0.1.0` after a
 refactor did not propagate; tag rotation fixed it.

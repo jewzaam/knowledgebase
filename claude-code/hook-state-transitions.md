@@ -9,6 +9,11 @@
 Claude Code supports 17+ hook event types. Hooks are configured in
 `~/.claude/settings.json` (or project-level `.claude/settings.json`).
 
+**OTEL gate:** Claude Code only emits an OTEL event for a hook type if at least one hook of that
+type is configured. No hook = no telemetry for that event type. To observe all events, register a
+no-op hook for every type. See `~/source/my-claude-stuff/claude/settings.json.d/hooks-noop.json`
+and `~/source/my-claude-stuff/docs/noop-hooks.md`.
+
 | Event | Description |
 |-------|-------------|
 | `PreToolUse` | Before tool execution. Exit 2 to block |
