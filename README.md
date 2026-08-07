@@ -52,7 +52,7 @@ This project's discoveries live in the [Knowledgebase](https://github.com/jewzaa
 |---|---|
 | [Agent SDK Usage Data](claude-code/agent-sdk-usage-data.md) | Extracting cost, token, context, and rate-limit data from the Agent SDK |
 | [Hook State Transitions](claude-code/hook-state-transitions.md) | Hook event types, state machines, and configuration |
-| [OAuth Tokens](claude-code/oauth-tokens.md) | Anthropic OAuth token taxonomy, endpoint compatibility, error-envelope quirks, K8s Secret tmpfs reset |
+| [OAuth Tokens](claude-code/oauth-tokens.md) | Anthropic OAuth token taxonomy, endpoint compatibility, error-envelope quirks, `~/.claude.json` auth-file requirement, K8s Secret tmpfs reset |
 | [Plugins](claude-code/plugins.md) | Plugin caching behavior, env vars, marketplace mechanics |
 | [OTEL Native Telemetry](claude-code/otel-native-telemetry.md) | Native OTEL event types, labels, query_source taxonomy, session state derivation signals |
 | [Skills](claude-code/skills.md) | Permission enforcement detail, shell injection mechanics |

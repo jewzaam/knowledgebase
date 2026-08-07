@@ -95,6 +95,31 @@ the body of every `refresh_token` grant per RFC 6749's public-client
 model (no `client_secret`). This is not a per-user identifier and not
 sensitive — it's the OAuth equivalent of a published app identifier.
 
+### `~/.claude.json` is a required auth file
+
+Claude Code checks `~/.claude.json` (at `$HOME` root, not inside
+`~/.claude/`) in addition to `~/.claude/.credentials.json`. Without
+`.claude.json`, the CLI presents a login prompt even when valid OAuth
+tokens exist in `.credentials.json`.
+
+The file is created by `claude login` and contains auth state alongside
+user configuration. Keys observed in a live instance include
+`claudeAiOauth`-related state plus ephemeral/usage-tracking fields
+(`projects`, `githubRepoPaths`, `toolUsage`, `pluginUsage`). The
+`claudeAiOauth` entries are the auth-relevant portion; the rest are
+session bookkeeping.
+
+Discovered while preserving OAuth credentials across container recreation
+in a rootless Podman sandbox: mounting `.credentials.json` alone was
+insufficient; adding `.claude.json` resolved the login prompt.
+
+When persisting auth across container rebuilds or CI environments, both
+files must be carried forward:
+
+- `~/.claude/.credentials.json` — tokens and expiry
+- `~/.claude.json` — auth state that the CLI checks before consulting
+  the credential store
+
 ## Kubernetes deployment quirk (cross-cutting)
 
 This is not Anthropic-specific but bites every service that consumes
