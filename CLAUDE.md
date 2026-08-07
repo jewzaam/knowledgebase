@@ -58,7 +58,7 @@ When adding a new knowledgebase doc:
 
 - [claude-code/agent-sdk-usage-data.md](claude-code/agent-sdk-usage-data.md) — extracting cost, token, context, and rate-limit data from the Agent SDK
 - [claude-code/hook-state-transitions.md](claude-code/hook-state-transitions.md) — hook event types, state machines, configuration
-- [claude-code/oauth-tokens.md](claude-code/oauth-tokens.md) — Anthropic OAuth token taxonomy, endpoint compatibility, error-envelope quirks, K8s Secret tmpfs reset
+- [claude-code/oauth-tokens.md](claude-code/oauth-tokens.md) — Anthropic OAuth token taxonomy, endpoint compatibility, error-envelope quirks, `~/.claude.json` auth-file requirement, K8s Secret tmpfs reset
 - [claude-code/plugins.md](claude-code/plugins.md) — plugin caching, env vars, marketplace mechanics
 - [claude-code/skills.md](claude-code/skills.md) — permission enforcement detail, shell injection mechanics
 - [claude-code/otel-native-telemetry.md](claude-code/otel-native-telemetry.md) — native OTEL event types, labels, query_source taxonomy, session state derivation signals
