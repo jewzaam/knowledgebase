@@ -74,6 +74,7 @@ This project's discoveries live in the [Knowledgebase](https://github.com/jewzaa
 |---|---|
 | [OpenShell](containers/openshell.md) | Proxy architecture (HTTP/1.1 CONNECT, no gRPC), host.containers.internal resolution |
 | [Podman Rootless Networking](containers/podman-rootless-networking.md) | Pasta TAP vs interface-copy mode, rootless-netns debugging, bridge data path, pasta version regressions |
+| [Terminal Multiplexers in Sandboxes](containers/terminal-multiplexers-in-sandboxes.md) | screen/tmux/dtach inside Landlock-enforced sandboxes: `/dev/pts` PTY fix, terminal emulation vs Claude Code TUI, dtach raw passthrough as working solution |
 
 ## [.NET](dotnet/)
 
