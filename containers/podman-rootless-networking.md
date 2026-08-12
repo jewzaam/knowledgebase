@@ -69,6 +69,12 @@ The masquerade step is critical:
 
 `host.containers.internal` resolves correctly to `169.254.1.2` from rootless podman containers on custom bridge networks (verified June 2026 on Fedora with passt-0^20250919). This works even though the bridge gateway IP (e.g., `10.89.1.1` from `podman network inspect`) does NOT route back to the host — curl to the gateway IP hangs indefinitely.
 
+**Key constraints**:
+
+- Containers can reach the host via `host.containers.internal` (resolves to `169.254.1.2`) or the host's real IP address
+- `localhost` inside a container does NOT reach the host — it resolves to the container's own loopback
+- The podman network gateway IP (e.g., `10.89.x.1`) does NOT route back to the host in rootless mode — it's an interface inside the rootless-netns only
+
 **Practical implication**: For container-to-host communication (e.g., a containerized worker calling a host-side API), use `http://host.containers.internal:<port>` or map via `extra_hosts` in compose:
 
 ```yaml

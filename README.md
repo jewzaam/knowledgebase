@@ -67,6 +67,7 @@ This project's discoveries live in the [Knowledgebase](https://github.com/jewzaa
 | [CRLF Line Endings Under WSL](common/crlf-wsl.md) | CRLF silently breaks bash scripts; detection via `file`, one-off `dos2unix`, durable `.gitattributes` prevention |
 | [gdbus GVariant Escaping](common/gdbus-gvariant-escaping.md) | gdbus GVariant double-escaping of quotes in D-Bus extension output, JSON parsing fix |
 | [Git Remote Discovery](common/git-remote-discovery.md) | Why `origin`/`upstream` are conventions not contracts |
+| [Mermaid Rendering](common/mermaid-rendering.md) | Node placement via connections, style color inheritance, subgraph nesting contrast, legend rendering, label quoting |
 
 ## [Containers](containers/)
 
@@ -113,6 +114,7 @@ This project's discoveries live in the [Knowledgebase](https://github.com/jewzaa
 |---|---|
 | [Cross-Platform](python/cross-platform.md) | Microsoft Store alias mechanism; SAC blocks pip .exe shims |
 | [Tkinter](python/tkinter.md) | Menu keyboard shortcuts: underline parameter is visual only, XWayland focus issues, bind_all() requirement |
+| [Web Frameworks](python/web-frameworks.md) | FastAPI/uvicorn HTTPS with self-signed certs; browser acceptance, curl -k, dev vs production TLS |
 
 ## Guiding Principles
 
