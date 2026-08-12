@@ -71,6 +71,9 @@ When adding a new knowledgebase doc:
 - [common/crlf-wsl.md](common/crlf-wsl.md) — CRLF line endings silently break bash scripts under WSL; detection, one-off fix, and durable `.gitattributes` prevention
 - [common/gdbus-gvariant-escaping.md](common/gdbus-gvariant-escaping.md) — gdbus GVariant double-escaping of quotes in D-Bus extension output, JSON parsing fix
 - [common/git-remote-discovery.md](common/git-remote-discovery.md) — why `origin`/`upstream` are conventions not contracts
+- [common/mermaid-rendering.md](common/mermaid-rendering.md) — Mermaid rendering behaviors: node placement via connections, style color inheritance, subgraph nesting contrast, legend rendering, label quoting
+
+Standards counterpart: [standards/common/documentation-diagrams.md](https://github.com/jewzaam/standards/blob/main/common/documentation-diagrams.md) — prescriptive rules for diagram structure
 
 ## Containers
 
