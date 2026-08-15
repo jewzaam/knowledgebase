@@ -1,6 +1,6 @@
 # Rootless Podman Networking
 
-Verified: 2026-06-29  
+Verified: 2026-08-15  
 Provenance: <https://github.com/NVIDIA/OpenShell>
 
 Rootless podman uses pasta (from the passt project) to provide network namespace connectivity without requiring root privileges. Pasta translates between L2/L3 in the rootless network namespace and L4 sockets on the host.
@@ -85,6 +85,12 @@ services:
 ```
 
 This provides a stable DNS name (`http://myhost:<port>`) for container→host calls. Never use the bridge gateway IP — it doesn't route to the host in rootless podman.
+
+## `--network host` Cannot Reach the Rootless-netns Gateway
+
+A container started with `--network host` joins the host network namespace, while a sandbox's proxy peer address (e.g. an OpenShell sandbox's gateway at `10.200.0.1`, see [containers/openshell.md](openshell.md#network-topology)) lives in podman's rootless-netns. A proxy started that way is running and healthy yet its port is refused from inside the sandbox — `--network host` bypasses the rootless-netns entirely, so it cannot see addresses that only exist inside it.
+
+Relatedly, the host cannot reach a rootless container's bridge IP either — a published port (`-p 127.0.0.1:PORT:PORT`) is required just to test such a container from the host.
 
 ## Docker and Rootless Podman Isolation
 
