@@ -1,6 +1,6 @@
 # OpenShell Sandbox Internals
 
-Verified: 2026-07-31  
+Verified: 2026-08-15  
 Provenance: <https://github.com/jewzaam/openshell-sandbox>
 
 OpenShell is a sandboxing tool that wraps container runtimes (podman, docker) with network and filesystem policies. Used for running untrusted code (e.g., Claude Code auto mode) with L4/L7 network filtering and Landlock filesystem restrictions.
@@ -18,6 +18,12 @@ The proxy is HTTP/1.1 only. gRPC (HTTP/2) cannot traverse it. Attempting to use 
 Omitting the `protocol` field in policy endpoints gives L4-only mode (no HTTP inspection), but traffic still routes through the proxy. This is not a bypass — it only disables application-layer filtering. gRPC still fails because the proxy itself is HTTP/1.1.
 
 **Workaround**: Use HTTP equivalents for gRPC services when possible. Example: OpenTelemetry OTLP supports both gRPC (port 4317) and HTTP (port 4318). Use the HTTP endpoint inside OpenShell sandboxes.
+
+### Denied vs Unreachable Host
+
+A policy-denied host and a policy-allowed-but-dead host fail differently, and the difference is diagnostic. The L7 CONNECT proxy returns `403` immediately when a host is not in the policy. When the host IS in the policy but the upstream service is unreachable, the proxy instead returns `502 Bad Gateway` after a delay, or never answers at all. Observed both from the same endpoint at different times: an allowed collector address whose service was down produced `502` on one attempt and a total stall on another. A health check that maps both `403` and "no response" to a single "blocked" state cannot distinguish a policy problem from an outage, and will misreport a dead service on a permitted host as a policy failure.
+
+`curl --connect-timeout` does not bound a request through the proxy — it only bounds the TCP connect to the proxy itself, which always succeeds immediately. If the proxy then stalls on an unreachable upstream, curl waits indefinitely. Measured: a request with `--connect-timeout 3` and no `--max-time` ran past 90 seconds with no response. Always set `--max-time` for reachability probes.
 
 ## Network Policy Validation
 
@@ -40,7 +46,7 @@ Network policy operates at host+port level only. No URL path filtering, no HTTP 
 
 ## Network Policy Discovery
 
-The container-side policy file is at `/etc/openshell/policy.yaml`. The host can inject **additional** policy entries that do not appear in the container's copy — the proxy enforces the union of both. Services may be reachable that are not listed in the container-side file. Verify access empirically rather than trusting the container copy as exhaustive.
+No container-side policy file exists in a current sandbox at `/etc/openshell/policy.yaml` — that path does not exist; `/etc/openshell/` contains only `auth/` and `tls/` subdirectories. A session cannot read its own effective policy from inside the container unless something outside places a copy there (e.g., `/sandbox/source/openshell-policy.yaml`, uploaded from the host per the project's own `CLAUDE.md`). The host can still inject **additional** policy entries beyond any uploaded copy — the proxy enforces the union — so an uploaded policy file should not be trusted as exhaustive; verify access empirically.
 
 Structure: YAML with `network_policies:` mapping named policies to `{endpoints, binaries}` pairs. Each endpoint has `host`, `port`, and optional L7 fields (`protocol`, `enforcement`, `access`, `rules`).
 
@@ -85,6 +91,10 @@ START_NS=$(python3 -c "import time; print(int((time.time() - 30*24*3600) * 1e9))
 
 Structured metadata fields (e.g., `event_name`, `session_id`, `cost_usd`, `model`, `query_source`) work as filter targets in LogQL from inside the sandbox, consistent with the [otel-native-telemetry](https://github.com/jewzaam/knowledgebase/blob/main/claude-code/otel-native-telemetry.md) documentation.
 
+### Tailscale MagicDNS Resolution
+
+A `<name>.<tailnet>.ts.net` host in the network policy resolves and works from inside a sandbox, because name resolution happens host-side at the L7 proxy and the host is on the tailnet — no Tailscale `100.x` address is needed inside the sandbox. Verified against a tailnet-exposed OTLP collector: with the host in policy the endpoint answered `405 Method Not Allowed` to a GET (correct for an OTLP HTTP receiver), and the same tailnet host when absent from the policy answered `403`.
+
 ## Container Identification
 
 OpenShell sandbox containers use labels for identification:
@@ -93,6 +103,25 @@ OpenShell sandbox containers use labels for identification:
 - `openshell.ai/sandbox-id` — UUID assigned by OpenShell
 
 Container names follow the pattern `openshell-default--<sandbox-name>-<sandbox-uuid>` but should not be hardcoded. Use label-based lookup via `podman ps -a --format json | jq` filtering on the `openshell.ai/sandbox-name` label.
+
+## Package Installation via apt
+
+`apt-get install` cannot succeed inside a sandbox: there is no `sudo`, `/usr` is `read_only` in the filesystem policy, and `/var` appears in neither the read-only nor read-write lists, so `/var/lib/apt`, `/var/cache`, and `/var/lib/dpkg/status` are all inaccessible.
+
+Discovery and extraction still work, by redirecting all of apt's state directories to a writable path. Verified sequence, given a policy allowing `deb.debian.org` on 80 and 443:
+
+```bash
+mkdir -p /tmp/apt/lists/partial /tmp/apt/cache/archives/partial
+A="-o Dir::State=/tmp/apt -o Dir::State::Lists=/tmp/apt/lists
+   -o Dir::Cache=/tmp/apt/cache -o Dir::State::status=/tmp/apt/status
+   -o Debug::NoLocking=1"
+apt-get $A update            # fetched ~10 MB
+apt-cache $A search '^ripgrep$'
+cd /tmp/apt && apt-get $A download ripgrep && dpkg -x ./*.deb /tmp/apt/root
+/tmp/apt/root/usr/bin/rg --version   # runs
+```
+
+`Dir::State` must be overridden too, not just `Dir::State::Lists` and `Dir::Cache` — without it apt fails on `/var/lib/apt/extended_states`. This makes a read-only Debian mirror grant genuinely useful: a session can identify a package, confirm it is the right one, extract a working binary, and use it directly from the extracted path, without ever needing install permission.
 
 ## Sandbox JWT Token Delivery
 
