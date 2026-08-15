@@ -5,11 +5,19 @@ Provenance: <https://github.com/jewzaam/openshell-sandbox>
 
 OpenShell is a sandboxing tool that wraps container runtimes (podman, docker) with network and filesystem policies. Used for running untrusted code (e.g., Claude Code auto mode) with L4/L7 network filtering and Landlock filesystem restrictions.
 
+## Network Topology
+
+A sandbox has exactly one network interface — a veth at `10.200.0.2/24` — and exactly one route, `default via 10.200.0.1`. It cannot reach a podman bridge network (e.g. `172.30.0.0/24`) directly; such an attempt is refused by the host, not by whatever is listening on the far end. The only egress path is OpenShell's proxy on the gateway address (`10.200.0.1`, see Proxy Architecture below). Anything else must be named in policy and reached through that proxy.
+
+Rootless podman puts that gateway address further out of reach for a container started with `--network host` — see [podman-rootless-networking.md](podman-rootless-networking.md#--network-host-cannot-reach-the-rootless-netns-gateway).
+
 ## Proxy Architecture
 
 All sandbox traffic routes through an HTTP/1.1 CONNECT proxy at a host-side veth IP (e.g., `10.200.0.1:3128`). The network namespace forces all traffic through the proxy regardless of environment variables. Setting `no_proxy` has no effect — the namespace-level routing supersedes it.
 
 OpenShell injects `ALL_PROXY=http://10.200.0.1:3128` plus lowercase `http_proxy`, `https_proxy`, `no_proxy` into sandbox processes. `ALL_PROXY` takes precedence over user-set `HTTP_PROXY`/`HTTPS_PROXY` in curl and many HTTP clients. To use a custom proxy, must unset `ALL_PROXY`/`all_proxy` and override the lowercase variants.
+
+Pointing `https_proxy` at a dead port causes curl to fail against that port, confirming the override is honoured and that the injected `ALL_PROXY` does not win once unset. Unsetting every proxy variable instead produces `Could not resolve host` — the sandbox has no resolver of its own; DNS is performed by the proxy. An attempt to bypass the proxy by unsetting the variables therefore looks like a hard block when it is actually loss of name resolution.
 
 The proxy is HTTP/1.1 only. gRPC (HTTP/2) cannot traverse it. Attempting to use gRPC endpoints (e.g., OTLP on port 4317) will fail silently or with protocol errors.
 
@@ -18,6 +26,20 @@ The proxy is HTTP/1.1 only. gRPC (HTTP/2) cannot traverse it. Attempting to use 
 Omitting the `protocol` field in policy endpoints gives L4-only mode (no HTTP inspection), but traffic still routes through the proxy. This is not a bypass — it only disables application-layer filtering. gRPC still fails because the proxy itself is HTTP/1.1.
 
 **Workaround**: Use HTTP equivalents for gRPC services when possible. Example: OpenTelemetry OTLP supports both gRPC (port 4317) and HTTP (port 4318). Use the HTTP endpoint inside OpenShell sandboxes.
+
+An endpoint declared without `protocol:` permits absolute-URI GET but refuses CONNECT: the same host:port returns `400` from the upstream service for a plain proxy-form GET (visible past L4) and `403` from OpenShell for CONNECT. Adding `protocol: rest` and `enforcement: enforce` makes CONNECT succeed.
+
+CONNECT is not restricted to port 443 — CONNECT to a permitted host on port 80 and on port 4318 both succeeded, so a non-443 port is not itself a reason for a CONNECT rejection.
+
+### Proxy Chaining
+
+Tested from an attempt to obtain broader outbound HTTPS by running an HTTP proxy outside the sandbox and chaining OpenShell's proxy to it — the attempt failed, and the failure modes are informative:
+
+- **Nested CONNECT is categorically blocked.** Given a policy that permits host:port of a second HTTP proxy, a client can establish a CONNECT tunnel to that proxy through OpenShell's proxy. Sending a further `CONNECT <target>:443` inside that tunnel gets the tunnel torn down with no response — for an inner target the policy allows (`api.anthropic.com:443`) exactly as for one it does not (`example.com:443`). This is a categorical limit on nested CONNECT, not policy enforcement on the inner request. Consequence: proxy chaining cannot carry HTTPS out of a sandbox, no matter what the policy says.
+
+- **Absolute-URI GET inside that same tunnel is NOT blocked, and reaches unlisted hosts.** Through a tunnel to a permitted proxy, `GET http://example.com/ HTTP/1.1` returned `200` from a sandbox whose policy never named `example.com`. `GET http://deb.debian.org/debian/` (a permitted host) also returned `200`. OpenShell blocks nested CONNECT but forwards nested absolute-URI requests without applying policy to the inner target — permitting a single endpoint that happens to be an HTTP proxy is therefore a much wider grant than it appears, yielding arbitrary cleartext egress. In practice the exposure is limited by how little of the web is cleartext (one measured research corpus: 18 of 5,423 URLs were `http://`), not by the policy.
+
+- **curl `--preproxy` does not chain HTTP to HTTP.** With `--preproxy http://<openshell-proxy> --proxy http://<second-proxy>`, curl sends `CONNECT <final-target>:443` to the preproxy and never contacts the second proxy at all; a request to a policy-permitted final target succeeded, proving the second proxy was bypassed rather than chained. `--preproxy` is a SOCKS-first mechanism. Chaining two HTTP proxies requires an external relay (for example socat's `PROXY:` address type), which does establish the tunnel correctly — the nested-CONNECT limit above is what defeats it afterwards.
 
 ### Denied vs Unreachable Host
 
