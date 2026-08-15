@@ -77,7 +77,7 @@ Standards counterpart: [standards/common/documentation-diagrams.md](https://gith
 
 ## Containers
 
-- [containers/openshell.md](containers/openshell.md) — OpenShell proxy architecture (HTTP/1.1 CONNECT, no gRPC), host.containers.internal resolution
+- [containers/openshell.md](containers/openshell.md) — OpenShell proxy architecture (HTTP/1.1 CONNECT, no gRPC), proxy chaining limits, host.containers.internal resolution
 - [containers/podman-rootless-networking.md](containers/podman-rootless-networking.md) — pasta TAP vs interface-copy mode, rootless-netns debugging, bridge data path, pasta version regressions
 - [containers/terminal-multiplexers-in-sandboxes.md](containers/terminal-multiplexers-in-sandboxes.md) — screen/tmux/dtach inside Landlock-enforced sandboxes: `/dev/pts` PTY fix, terminal emulation vs Claude Code TUI, dtach raw passthrough as working solution
 
