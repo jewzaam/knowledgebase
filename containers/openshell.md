@@ -62,6 +62,8 @@ Only subdomain-scoped wildcards (`*.example.com`) are accepted. No mechanism for
 
 Network policy operates at host+port level only. No URL path filtering, no HTTP verb filtering. The L7 CONNECT proxy establishes a TLS tunnel; once up, it cannot inspect HTTP methods or paths inside the tunnel. The `access` field values (`read-only`, `full`) are OpenShell's own access tier concept, not HTTP GET vs POST filtering.
 
+Because the CONNECT tunnel is opaque at the TLS layer, client-side TLS fingerprint impersonation (e.g. a Chrome-impersonating HTTP client) survives the tunnel intact — the proxy cannot see or alter the client hello. Practical consequence, observed running [claude-skill-cited-research](https://github.com/jewzaam/claude-skill-cited-research) inside an [openshell-sandbox](https://github.com/jewzaam/openshell-sandbox) container: a search library that impersonates a browser's TLS handshake to avoid anti-bot challenges keeps working through an OpenShell CONNECT proxy that allowlists the target hosts. It cannot be routed instead through the sandbox's host-side fetch service, since that issues plain GETs on the caller's behalf and would substitute its own (non-impersonated) TLS fingerprint, reintroducing the anti-bot challenge.
+
 ## Exec Session Stability
 
 `sandbox exec` TTY sessions drop during idle periods. `--timeout 0` is the default (no timeout), so it is not an exec-level timeout. The gRPC stream between CLI and gateway/supervisor is suspected of being reaped. No keepalive configuration is exposed. Workaround: background process writing ENQ byte to stdout every 30s.
