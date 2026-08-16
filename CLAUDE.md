@@ -63,6 +63,7 @@ When adding a new knowledgebase doc:
 - [claude-code/skills.md](claude-code/skills.md) — permission enforcement detail, shell injection mechanics
 - [claude-code/otel-native-telemetry.md](claude-code/otel-native-telemetry.md) — native OTEL event types, labels, query_source taxonomy, session state derivation signals
 - [claude-code/workflow-structured-output.md](claude-code/workflow-structured-output.md) — Workflow tool `args` global failure, `agent(schema:)` StructuredOutput mechanism, Ajv validation, schema constraint support matrix
+- [claude-code/websearch-and-subagent-tools.md](claude-code/websearch-and-subagent-tools.md) — WebSearch server-side execution vs WebFetch client-side egress, per-session search budget, non-verbatim results, sub-agent permission-prompt visibility, Bash output visibility
 
 ## Common
 
@@ -77,7 +78,7 @@ Standards counterpart: [standards/common/documentation-diagrams.md](https://gith
 
 ## Containers
 
-- [containers/openshell.md](containers/openshell.md) — OpenShell proxy architecture (HTTP/1.1 CONNECT, no gRPC), proxy chaining limits, host.containers.internal resolution
+- [containers/openshell.md](containers/openshell.md) — OpenShell proxy architecture (HTTP/1.1 CONNECT, no gRPC), proxy chaining limits, host.containers.internal resolution, TLS fingerprint impersonation surviving the CONNECT tunnel opaquely
 - [containers/podman-rootless-networking.md](containers/podman-rootless-networking.md) — pasta TAP vs interface-copy mode, rootless-netns debugging, bridge data path, pasta version regressions
 - [containers/terminal-multiplexers-in-sandboxes.md](containers/terminal-multiplexers-in-sandboxes.md) — screen/tmux/dtach inside Landlock-enforced sandboxes: `/dev/pts` PTY fix, terminal emulation vs Claude Code TUI, dtach raw passthrough as working solution
 
@@ -111,3 +112,4 @@ Standards counterpart: [standards/common/documentation-diagrams.md](https://gith
 - [python/cross-platform.md](python/cross-platform.md) — Microsoft Store alias mechanism; Smart App Control blocking pip .exe shims
 - [python/tkinter.md](python/tkinter.md) — Tkinter menu keyboard shortcuts (underline parameter is visual only, XWayland focus issues, bind_all() requirement), Unicode rendering (supplementary plane broken on Linux), Canvas scroll events (embedded widgets consume events), ttk.Notebook scroll-to-change-tab behavior
 - [python/web-frameworks.md](python/web-frameworks.md) — FastAPI/uvicorn HTTPS with self-signed certs (browser acceptance requirement, curl -k flag, dev vs production TLS)
+- [python/ddgs-metasearch.md](python/ddgs-metasearch.md) — `ddgs` is a nine-backend metasearch layer not a DuckDuckGo client; `ENGINES` registry; silent fallback on unknown backend names; per-call vs cross-call result diversity; wikipedia/grokipedia as lookups not indexes; yahoo backend is Bing-powered; backend availability volatility; TLS fingerprint as the anti-bot discriminator

@@ -57,6 +57,7 @@ This project's discoveries live in the [Knowledgebase](https://github.com/jewzaa
 | [OTEL Native Telemetry](claude-code/otel-native-telemetry.md) | Native OTEL event types, labels, query_source taxonomy, session state derivation signals |
 | [Skills](claude-code/skills.md) | Permission enforcement detail, shell injection mechanics |
 | [Workflow Structured Output](claude-code/workflow-structured-output.md) | Workflow `args` global failure, `agent(schema:)` mechanism, Ajv validation, schema constraints |
+| [WebSearch and Sub-Agent Tools](claude-code/websearch-and-subagent-tools.md) | WebSearch server-side execution vs WebFetch client-side egress, per-session search budget, non-verbatim results, sub-agent permission-prompt visibility, Bash output visibility |
 
 ## [Common](common/)
 
@@ -73,7 +74,7 @@ This project's discoveries live in the [Knowledgebase](https://github.com/jewzaa
 
 | Doc | Description |
 |---|---|
-| [OpenShell](containers/openshell.md) | Proxy architecture (HTTP/1.1 CONNECT, no gRPC), host.containers.internal resolution |
+| [OpenShell](containers/openshell.md) | Proxy architecture (HTTP/1.1 CONNECT, no gRPC), host.containers.internal resolution, TLS fingerprint impersonation surviving the CONNECT tunnel |
 | [Podman Rootless Networking](containers/podman-rootless-networking.md) | Pasta TAP vs interface-copy mode, rootless-netns debugging, bridge data path, pasta version regressions |
 | [Terminal Multiplexers in Sandboxes](containers/terminal-multiplexers-in-sandboxes.md) | screen/tmux/dtach inside Landlock-enforced sandboxes: `/dev/pts` PTY fix, terminal emulation vs Claude Code TUI, dtach raw passthrough as working solution |
 
@@ -115,6 +116,7 @@ This project's discoveries live in the [Knowledgebase](https://github.com/jewzaa
 | [Cross-Platform](python/cross-platform.md) | Microsoft Store alias mechanism; SAC blocks pip .exe shims |
 | [Tkinter](python/tkinter.md) | Menu keyboard shortcuts: underline parameter is visual only, XWayland focus issues, bind_all() requirement |
 | [Web Frameworks](python/web-frameworks.md) | FastAPI/uvicorn HTTPS with self-signed certs; browser acceptance, curl -k, dev vs production TLS |
+| [ddgs Metasearch](python/ddgs-metasearch.md) | `ddgs` is a nine-backend metasearch layer; `ENGINES` registry; silent fallback on bad backend names; result diversity per call vs across calls; wikipedia/grokipedia as lookups; yahoo is Bing-powered; TLS fingerprint as anti-bot discriminator |
 
 ## Guiding Principles
 
