@@ -1,7 +1,7 @@
 # OpenShell Sandbox Internals
 
-Verified: 2026-08-15  
-Provenance: <https://github.com/jewzaam/openshell-sandbox>
+Verified: 2026-08-17  
+Provenance: <https://github.com/jewzaam/openshell-sandbox>, <https://github.com/NVIDIA/OpenShell>
 
 OpenShell is a sandboxing tool that wraps container runtimes (podman, docker) with network and filesystem policies. Used for running untrusted code (e.g., Claude Code auto mode) with L4/L7 network filtering and Landlock filesystem restrictions.
 
@@ -63,6 +63,48 @@ Only subdomain-scoped wildcards (`*.example.com`) are accepted. No mechanism for
 Network policy operates at host+port level only. No URL path filtering, no HTTP verb filtering. The L7 CONNECT proxy establishes a TLS tunnel; once up, it cannot inspect HTTP methods or paths inside the tunnel. The `access` field values (`read-only`, `full`) are OpenShell's own access tier concept, not HTTP GET vs POST filtering.
 
 Because the CONNECT tunnel is opaque at the TLS layer, client-side TLS fingerprint impersonation (e.g. a Chrome-impersonating HTTP client) survives the tunnel intact — the proxy cannot see or alter the client hello. Practical consequence, observed running [claude-skill-cited-research](https://github.com/jewzaam/claude-skill-cited-research) inside an [openshell-sandbox](https://github.com/jewzaam/openshell-sandbox) container: a search library that impersonates a browser's TLS handshake to avoid anti-bot challenges keeps working through an OpenShell CONNECT proxy that allowlists the target hosts. It cannot be routed instead through the sandbox's host-side fetch service, since that issues plain GETs on the caller's behalf and would substitute its own (non-impersonated) TLS fingerprint, reintroducing the anti-bot challenge.
+
+## Control-Plane Ports Are Blocked Unconditionally
+
+Five ports are refused for every sandbox regardless of policy, `allowed_ips`, address range, or hostname:
+
+```rust
+// crates/openshell-supervisor-network/src/proxy.rs
+const BLOCKED_CONTROL_PLANE_PORTS: &[u16] = &[
+    2379,  // etcd client
+    2380,  // etcd peer
+    6443,  // Kubernetes API server
+    10250, // kubelet API
+    10255, // kubelet read-only
+];
+```
+
+The check runs in all three destination-validation paths — `validate_allowed_ips_for_resolved_addrs`, `validate_declared_endpoint_resolved_addrs`, and `resolve_and_check_trusted_gateway` — so none of these reaches a Kubernetes API server:
+
+- an endpoint naming the IP literal, with or without `allowed_ips`
+- an endpoint naming a hostname that resolves to it, including a tailnet name
+- `host.containers.internal:6443`, despite that alias otherwise bypassing the SSRF tiers
+
+It arrived in `834f8aa1` (2026-03-23, "security hardening batch 1", SEC-005) as *"defense-in-depth for the allowed_ips feature"* — the stated concern being that a broad CIDR such as `10.0.0.0/8` would unintentionally expose control-plane services. A later commit (`f1fc87e1`, #1560) added a trust tier that does relax RFC1918 for operator-declared hostnames, and deliberately preserved the port block.
+
+There is no configuration knob, and adding one is the wrong shape: OpenShell is deployed with the gateway and sandboxes inside a Kubernetes cluster, where the party authoring the sandbox policy is frequently the party the cluster is being protected from. A policy-level opt-in would be written by exactly the wrong actor. Reachability, not authorization, is the grant being withheld — a sandbox that can reach the API server presents whatever credential it can find, including an in-cluster pod's projected ServiceAccount token, so read-only RBAC on an intended identity does not bound the exposure.
+
+### Consequence for cluster access from a sandbox
+
+`kubectl` against a standard cluster cannot work from inside a sandbox. It fails at the proxy before TLS, so the error is a bare `Unable to connect to the server: Forbidden` with no Kubernetes `Status` body.
+
+A host-side TCP forwarder on an unblocked port defeats the block (the port is checked, the destination is not), but only in the podman-on-a-host deployment where such a host exists — and it is a *wider* hole than it appears, because `host.containers.internal` cannot be port-filtered by policy, so the forwarder becomes reachable from every sandbox on that host regardless of each one's policy.
+
+### Denial envelopes distinguish the two rejections
+
+Both return `403`, and the JSON body says which layer refused:
+
+```json
+{"error":"policy_denied","detail":"GET 10.0.0.5:9000/health not permitted by policy"}
+{"error":"ssrf_denied","detail":"GET 10.0.0.5:6443 blocked: allowed_ips check failed"}
+```
+
+`policy_denied` means no endpoint matched. `ssrf_denied` means an endpoint matched and destination validation refused the address or port. An endpoint whose `host` is an IP literal gets that address implicitly allowlisted (`implicit_allowed_ips_for_ip_host`), which is why a blocked control-plane port on a declared IP reports an `allowed_ips` failure despite no `allowed_ips` appearing in the policy.
 
 ## Exec Session Stability
 
