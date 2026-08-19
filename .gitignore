@@ -38,3 +38,6 @@ ANALYSIS.md
 Findings-*.md
 Findings-*.json
 Report-*.json
+
+# Open PR data (generated per-repo by the sandbox host)
+open-prs.json

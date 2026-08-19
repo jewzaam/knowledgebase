@@ -56,6 +56,8 @@ def _is_enum_excluded(rel_path: Path) -> bool:
         return True
     if name.startswith("Findings-") or name.startswith("Report-"):
         return True
+    if name == "open-prs.json":
+        return True
     return False
 
 
