@@ -116,6 +116,19 @@ No container-side policy file exists in a current sandbox at `/etc/openshell/pol
 
 Structure: YAML with `network_policies:` mapping named policies to `{endpoints, binaries}` pairs. Each endpoint has `host`, `port`, and optional L7 fields (`protocol`, `enforcement`, `access`, `rules`).
 
+## CLIs That Resolve Their Schema Remotely
+
+A CLI that fetches its command schema at runtime is unusable when that host is outside the policy, and the breakage is not limited to real API calls — help and schema subcommands fail identically, so there is no offline way to check what a command even accepts.
+
+The `gws` Google Workspace CLI fetches `https://www.googleapis.com/discovery/v1/apis/<service>/<version>/rest` on every service invocation. Without `googleapis.com` in the policy:
+
+```text
+$ gws tasks tasks list --params '{"tasklist":"@default"}'
+error[discovery]: error sending request for url (https://www.googleapis.com/discovery/v1/apis/tasks/v1/rest): client error (Connect): tunnel error: unsuccessful
+```
+
+`gws tasks --help` and `gws schema tasks.tasks.list` fail the same way. Only the static top-level `gws --help` and `gws auth status` (cached token, no discovery) still work. Service notes: <https://github.com/jewzaam/gws-cli-notes>.
+
 ## Host Access from Containers
 
 `host.containers.internal` resolves to `169.254.1.2` inside podman containers. This is the standard hostname for reaching the host machine from a container. However, it is NOT directly reachable from inside the sandbox — all traffic is forced through the L7 proxy at `10.200.0.1:3128`. Connections to `host.containers.internal:<port>` only succeed if the proxy allows them per policy.
@@ -188,6 +201,41 @@ cd /tmp/apt && apt-get $A download ripgrep && dpkg -x ./*.deb /tmp/apt/root
 ```
 
 `Dir::State` must be overridden too, not just `Dir::State::Lists` and `Dir::Cache` — without it apt fails on `/var/lib/apt/extended_states`. This makes a read-only Debian mirror grant genuinely useful: a session can identify a package, confirm it is the right one, extract a working binary, and use it directly from the extracted path, without ever needing install permission.
+
+## Uploaded Host State That Does Not Run in the Sandbox
+
+### An uploaded `.venv` is unusable
+
+The host builds the virtualenv against the host interpreter; the sandbox image ships a different one. Compiled extensions carry the host ABI tag (`*.cpython-314-x86_64-linux-gnu.so` against a sandbox Python 3.13) and the venv has no `pip` module, so any Makefile target starting with `python -m pip install -e .` dies:
+
+```text
+.venv/bin/python: No module named pip
+make: *** [Makefile:36: install-dev] Error 1
+```
+
+Where `make check` depends on an `install-dev` target, the whole check pipeline is unreachable through make. Work around it with the sandbox's own system interpreter — `python3 -m pip install --user <dev deps>` into `~/.local`, then run the individual steps (format, lint, typecheck, test, coverage) by hand. A dependency pinned to a `git+https://github.com/...` URL cannot be installed at all, since GitHub is not in the network policy.
+
+### `git commit` fails on SSH commit signing
+
+```text
+error: cannot run ssh-keygen: No such file or directory
+error:
+fatal: failed to write commit object
+```
+
+The uploaded global git config enables SSH commit signing (`gpg.format=ssh`, `commit.gpgsign=true`) and `ssh-keygen` is not in the sandbox image. Any test that shells out to `git commit` fails, which reads as a broken test suite when it is purely environmental. To run such a suite, neutralize the global config for that invocation: `GIT_CONFIG_GLOBAL=/dev/null` plus `GIT_AUTHOR_NAME`, `GIT_AUTHOR_EMAIL`, `GIT_COMMITTER_NAME`, `GIT_COMMITTER_EMAIL`. In one Python repo this turned "5 failed, 53 errors" into a fully green suite with no code changes.
+
+## POSIX Semaphores Are Unavailable
+
+Anything that reaches for `multiprocessing.Semaphore` dies:
+
+```text
+PermissionError: [Errno 13] Permission denied
+  File ".../multiprocessing/synchronize.py", line 57, in __init__
+    sl = self._semlock = _multiprocessing.SemLock(
+```
+
+flake8 hits this in its default parallel mode — run `flake8 -j 1`. Expect the same shape from any tool that forks a process pool by default; the fix is always to force single-process operation.
 
 ## Sandbox JWT Token Delivery
 
