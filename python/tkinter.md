@@ -97,3 +97,50 @@ notebook.bind("<MouseWheel>", lambda e: "break")
 
 The `"break"` return value stops event propagation, preventing the notebook
 from processing the scroll as a tab-change command.
+
+## Text Tag Bindings vs Embedded Widgets for Row Controls
+
+A `tk.Button` embedded in a `tk.Text` via `window_create()` requests 28x24
+pixels at a 13px body font, while the text line it sits on is 20px. In a list
+where each row is a button plus a short label, the button dominates the row
+and forces every line taller than its text needs. A row of three such controls
+also means one widget per control per row — thousands of widgets for a long
+list.
+
+Tagged text with `tag_bind` is the lighter equivalent: the glyph renders at
+exact line height, costs no widget, and hover feedback comes from
+`tag_configure(tag, foreground=...)` inside `<Enter>`/`<Leave>` bindings.
+The trade-off is losing the button's `activebackground` press feedback.
+
+`tag_bind(tag, sequence, func)` **replaces** the script for that sequence by
+default (Tkinter passes no `+`). Re-rendering a Text that reuses tag names
+across renders therefore does not accumulate stale callbacks. Note that
+`delete("1.0", END)` removes tags from the content but leaves the tag objects
+and their bindings defined on the widget.
+
+## Synthesizing Clicks on Text Tags
+
+`widget.event_generate("<Button-1>", x=..., y=...)` does **not** fire
+`tag_bind` callbacks, even when the coordinates resolve to the tagged
+character. Two things are required:
+
+1. A `<Motion>` event at the coordinates first. Tk dispatches tag bindings off
+   the `current` mark, and only pointer motion updates it.
+2. An explicit `<ButtonPress-1>` / `<ButtonRelease-1>` pair rather than
+   `<Button-1>`, carrying `rootx`/`rooty` as well as `x`/`y`.
+
+```python
+x, y, w, h = text.bbox(text.tag_ranges(tag)[0])
+cx, cy = x + w // 2, y + h // 2
+kw = dict(x=cx, y=cy, rootx=text.winfo_rootx() + cx, rooty=text.winfo_rooty() + cy)
+text.event_generate("<Motion>", **kw)
+root.update()
+text.event_generate("<ButtonPress-1>", **kw)
+text.event_generate("<ButtonRelease-1>", **kw)
+root.update()
+```
+
+This is what makes Tkinter widget wiring testable under Xvfb. It does not make
+appearance testable — Xvfb has no window manager and different fonts, so
+geometry, decoration, and glyph-rendering behavior still have to be checked on
+a real desktop.

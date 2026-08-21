@@ -114,7 +114,7 @@ This project's discoveries live in the [Knowledgebase](https://github.com/jewzaa
 | Doc | Description |
 |---|---|
 | [Cross-Platform](python/cross-platform.md) | Microsoft Store alias mechanism; SAC blocks pip .exe shims |
-| [Tkinter](python/tkinter.md) | Menu keyboard shortcuts: underline parameter is visual only, XWayland focus issues, bind_all() requirement |
+| [Tkinter](python/tkinter.md) | Menu keyboard shortcuts: underline parameter is visual only, XWayland focus issues, bind_all() requirement; text tag bindings vs embedded widgets for row controls; synthesizing clicks on text tags |
 | [Web Frameworks](python/web-frameworks.md) | FastAPI/uvicorn HTTPS with self-signed certs; browser acceptance, curl -k, dev vs production TLS |
 | [ddgs Metasearch](python/ddgs-metasearch.md) | `ddgs` is a nine-backend metasearch layer; `ENGINES` registry; silent fallback on bad backend names; result diversity per call vs across calls; wikipedia/grokipedia as lookups; yahoo is Bing-powered; TLS fingerprint as anti-bot discriminator |
 
