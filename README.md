@@ -98,6 +98,7 @@ This project's discoveries live in the [Knowledgebase](https://github.com/jewzaa
 | [Job Sync Hooks](kubernetes/job-sync-hooks.md) | Jobs are immutable; Argo CD sync hooks for delete-and-recreate |
 | [kubectl run Entrypoints](kubernetes/kubectl-run-entrypoints.md) | Match `kubectl run -- <args>` to image's ENTRYPOINT shape |
 | [Longhorn Volume Behavior](kubernetes/longhorn-volume-behavior.md) | Thin provisioning vs scheduling reservation; failure symptoms when nominal budget exhausted; Helm hot-update limitation; space reclamation via Trim Filesystem vs in-pod fstrim; ad-hoc Backup admission webhook EOF on 1.11.x |
+| [OpenShell Helm Chart](kubernetes/openshell-helm-chart.md) | chart named `helm-chart` so `nameOverride` decides resource names; `fullnameOverride` renames resources but NOT selector labels (StatefulSet rename hazard); `lookup`-based credential KEK regenerates under `helm template`/Argo; agent-sandbox preflight `fail`; silently-ignored `service.annotations`; manylinux_2_39-only wheels; no CLI/gateway version negotiation |
 | [Tailscale Kubernetes Operator](kubernetes/tailscale-operator.md) | ClusterIP Service exposure, port=tailnet-port mapping, port 443 for portless URLs, L4 TCP passthrough (no TLS termination) |
 | [PodSecurity Restricted Pod](kubernetes/podsecurity-restricted-pod.md) | Admission-rejection wall-of-text format and why it surfaces only at admission |
 | [Resource Limits](kubernetes/resource-limits.md) | CFS bandwidth controller throttling mechanics; why CPU limits hurt |
