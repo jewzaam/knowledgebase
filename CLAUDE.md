@@ -65,6 +65,10 @@ When adding a new knowledgebase doc:
 - [claude-code/workflow-structured-output.md](claude-code/workflow-structured-output.md) — Workflow tool `args` global failure, `agent(schema:)` StructuredOutput mechanism, Ajv validation, schema constraint support matrix
 - [claude-code/websearch-and-subagent-tools.md](claude-code/websearch-and-subagent-tools.md) — WebSearch server-side execution vs WebFetch client-side egress, per-session search budget, non-verbatim results, sub-agent permission-prompt visibility, Bash output visibility
 
+## Codex CLI
+
+- [codex-code/otel-native-telemetry.md](codex-code/otel-native-telemetry.md) — Codex hook/config file locations, project trust scoping, hook payload fields, `codex_turn_token_usage_sum` histogram token_type values, native OTEL export behavior
+
 ## Common
 
 - [common/atlassian-api-auth.md](common/atlassian-api-auth.md) — Atlassian API token types, scoping, URL routing, auth methods, and network policy granularity

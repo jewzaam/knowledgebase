@@ -59,6 +59,12 @@ This project's discoveries live in the [Knowledgebase](https://github.com/jewzaa
 | [Workflow Structured Output](claude-code/workflow-structured-output.md) | Workflow `args` global failure, `agent(schema:)` mechanism, Ajv validation, schema constraints |
 | [WebSearch and Sub-Agent Tools](claude-code/websearch-and-subagent-tools.md) | WebSearch server-side execution vs WebFetch client-side egress, per-session search budget, non-verbatim results, sub-agent permission-prompt visibility, Bash output visibility |
 
+## [Codex CLI](codex-code/)
+
+| Doc | Description |
+|---|---|
+| [OTEL Native Telemetry](codex-code/otel-native-telemetry.md) | Codex hook/config file locations, project trust scoping, hook payload fields, `codex_turn_token_usage_sum` histogram token_type values, native OTEL export behavior |
+
 ## [Common](common/)
 
 | Doc | Description |
