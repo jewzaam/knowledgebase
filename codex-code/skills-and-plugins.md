@@ -199,9 +199,24 @@ estimate rather than a measurement.
 
 ## Invoking a skill
 
-`/skills` or `$<skill-name>` in the Codex CLI and IDE extension; `@<skill-name>`
-in ChatGPT. Codex picks up skill changes automatically; restart if an edit does
-not appear.
+`/skills` opens a picker, so the name is never typed there. Typing `$` mentions
+a skill by name in the Codex CLI and IDE extension; ChatGPT uses `@`. Codex
+picks up skill changes automatically; restart if an edit does not appear.
+
+**A plugin-bundled skill is namespaced; a standalone one is not.** The
+qualifier is the `name` from the plugin's `.codex-plugin/plugin.json`, so the
+same `SKILL.md` is `$review` when dropped in `.agents/skills/` and
+`$my-plugin:review` when installed as part of `my-plugin`. This mirrors Claude
+Code's `/my-plugin:review`. The official docs never state the form — they say
+only "the invocation syntax for your surface" — but
+[codex#28608](https://github.com/openai/codex/pull/28608) ("use the provided
+namespace when qualifying plugin skill names") is explicit, and published
+plugins use it: `$coding:replan`, `$security:web-security-review`.
+
+This matters for anything that writes the invocation down — an
+`agents/openai.yaml` `default_prompt`, a README, or a skill body that tells the
+user how to re-run it. The unqualified form silently stops resolving the moment
+the skill ships inside a plugin.
 
 ## Sources
 

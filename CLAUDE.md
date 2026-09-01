@@ -68,7 +68,7 @@ When adding a new knowledgebase doc:
 ## Codex CLI
 
 - [codex-code/otel-native-telemetry.md](codex-code/otel-native-telemetry.md) — Codex hook/config file locations, project trust scoping, hook payload fields, `codex_turn_token_usage_sum` histogram token_type values, native OTEL export behavior
-- [codex-code/skills-and-plugins.md](codex-code/skills-and-plugins.md) — `.agents/skills` discovery scopes, initial-list truncation budget, Agent Skills frontmatter vs Claude Code's dialect, absent `!`-injection, `.codex-plugin/plugin.json` and marketplace sources (legacy `.claude-plugin/` read, silent skip on unresolvable source), `codex exec` JSONL/`--output-schema` behavior and its token-only usage data
+- [codex-code/skills-and-plugins.md](codex-code/skills-and-plugins.md) — `.agents/skills` discovery scopes, initial-list truncation budget, Agent Skills frontmatter vs Claude Code's dialect, absent `!`-injection, plugin-namespaced `$plugin:skill` invocation vs bare `$skill`, `.codex-plugin/plugin.json` and marketplace sources (legacy `.claude-plugin/` read, silent skip on unresolvable source), `codex exec` JSONL/`--output-schema` behavior and its token-only usage data
 
 ## Common
 
