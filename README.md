@@ -64,6 +64,7 @@ This project's discoveries live in the [Knowledgebase](https://github.com/jewzaa
 | Doc | Description |
 |---|---|
 | [OTEL Native Telemetry](codex-code/otel-native-telemetry.md) | Codex hook/config file locations, project trust scoping, hook payload fields, `codex_turn_token_usage_sum` histogram token_type values, native OTEL export behavior |
+| [Skills and Plugins](codex-code/skills-and-plugins.md) | `.agents/skills` discovery scopes, initial-list truncation budget, Agent Skills frontmatter vs Claude Code's dialect, absent `!`-injection, `.codex-plugin/plugin.json` and marketplace sources, `codex exec` structured-output behavior |
 
 ## [Common](common/)
 
