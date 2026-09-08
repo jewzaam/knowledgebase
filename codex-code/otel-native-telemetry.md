@@ -22,6 +22,41 @@ identity, `cwd`, and `model` fields. The conversation identity remains stable
 when `/cd` changes the working directory; `/cd` changes `cwd` without creating
 a new conversation.
 
+The durable join key for native Codex records is `conversation_id`. The hook
+observer reports the same value as its `session_id` field, but native
+Prometheus metrics do not carry that identity. A dashboard that needs a
+conversation selector therefore needs a bounded recording-rule index (for
+example, a count grouped by `conversation_id`) while token and accounting
+panels should filter the original Loki event records by `conversation_id`.
+
+This also means that the recording rule is not a historical backfill: the
+selector series become available as the rule evaluates. Historical event data
+can still be queried directly from Loki over its retention window.
+
+Native response-completion records are emitted as
+`service_name="codex_cli_rs"`, `event_name="codex.sse_event"`, and
+`event_kind="response.completed"`. The useful structured numeric fields are
+`input_token_count`, `cached_token_count`, `cache_write_token_count`,
+`output_token_count`, and `tool_token_count`; `model`, `project`,
+`conversation_id`, and sandbox metadata are available for filtering and
+grouping. Exact cost panels should sum these Loki fields and apply explicit
+model pricing rather than relying on reset-prone Prometheus counter
+increases.
+
+For environment attribution, derive the display label from sandbox metadata:
+`sb-<sandbox_profile>` when `sandbox_profile` exists, otherwise `local`.
+Group cost by this derived `env` label, not by model. An unlabeled
+`vector(0)` fallback can erase the grouping label during LogQL arithmetic;
+use a zero-valued fallback that carries the same grouping label instead.
+
+Grafana panels using these Loki metric queries must use the Loki datasource at
+both panel and target level. Loki table targets need `format: "table"`,
+`instant: true`, and `range: false`; leaving them as range targets can make a
+valid query render as no data when Grafana transformations expect table rows.
+Long multi-model LogQL expressions may also exceed the local Loki gateway's
+GET header limit; split the query into smaller targets or use an allowed POST
+path before adding a Grafana join/aggregation transformation.
+
 ## Native OTEL metrics
 
 Native Codex OTEL metrics normalize token usage to the
