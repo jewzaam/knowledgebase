@@ -65,6 +65,7 @@ This project's discoveries live in the [Knowledgebase](https://github.com/jewzaa
 | Doc | Description |
 |---|---|
 | [OTEL Native Telemetry](codex-code/otel-native-telemetry.md) | Codex hook/config file locations, project trust scoping, hook payload fields, `codex_turn_token_usage_sum` histogram token_type values, native OTEL export behavior |
+| [Model Context Window](codex-code/model-context-window.md) | Catalog `context_window` vs `max_context_window` per model; `model_context_window` is the only key that moves it (i64, no feature flag, no `model_max_output_tokens`); no client-side clamp; `model_auto_compact_token_limit`/`_scope` derived from the effective window (`total` vs `body_after_prefix`); `model_catalog_json` override; no offline read-back of either effective value |
 | [Skills and Plugins](codex-code/skills-and-plugins.md) | `.agents/skills` discovery scopes, initial-list truncation budget, Agent Skills frontmatter vs Claude Code's dialect, absent `!`-injection, plugin-namespaced `$plugin:skill` invocation, `.codex-plugin/plugin.json` and marketplace sources, `codex exec` structured-output behavior |
 
 ## [Common](common/)
