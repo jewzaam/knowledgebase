@@ -65,6 +65,97 @@ true` in particular reads as "will not fire implicitly" and does nothing —
 under Codex the skill stays implicitly invocable unless `openai.yaml` says
 otherwise.
 
+### `request_user_input` is the AskUserQuestion counterpart
+
+Codex has a built-in structured-question tool, `request_user_input`. Its schema
+is close to Claude Code's `AskUserQuestion`: `questions[]` of `{id, header,
+question, options[]}`, options of `{label, description}`, recommended option
+first with a `(Recommended)` label suffix, and a free-form "Other" the client
+adds — `normalize_request_user_input_tool_args` sets `is_other = true` on every
+question, so authoring one is wrong. Options are required; a question without
+them is rejected outright.
+
+Three limits have no Claude Code equivalent:
+
+- **Mode-gated, and off by default.** The handler holds `available_modes` and
+  its description is generated as "only available in {modes}". Outside them the
+  call returns `request_user_input is unavailable in <mode> mode`. Plan mode is
+  the only default grant — see the flag below, which is what makes the tool
+  usable at all for most skills.
+- **Root thread only.** `is_non_root_agent()` returns
+  "request_user_input can only be used by the root thread" — sub-agents cannot
+  ask. No flag changes this.
+- **At most 3 questions** ("prefer 1 and do not exceed 3") against Claude
+  Code's 4, and options described as "2-3 mutually exclusive choices".
+
+`is_blocking` is set to `mode == ModeKind::Plan`, so it is true only in Plan
+mode; the handler awaits a response either way and errors if the call is
+cancelled first.
+
+#### Plan mode is not the way to get it
+
+The default grant is a trap for any skill that does work. Plan mode permits the
+question but forbids the execution — and mode changes are user-initiated, so a
+skill cannot move itself from Plan to Default to run what it just asked about.
+A skill that refuses to start outside Plan mode therefore never runs at all,
+rather than sometimes running. Use the flag instead.
+
+#### `default_mode_request_user_input`
+
+Set in `~/.codex/config.toml` to get the tool in Default mode:
+
+```toml
+[features]
+default_mode_request_user_input = true
+```
+
+**Verified working** (September 2026). The capability landed in
+[codex#12735](https://github.com/openai/codex/pull/12735), merged February 2026:
+"allow `request_user_input` in Default collaboration mode as well as Plan."
+
+The flag is `Stage::UnderDevelopment` with `default_enabled: false`, and
+`UnderDevelopment` is documented as "not ready for external use" — it is
+deliberately absent from the `/experimental` menu. A config key still turns it
+on because `Features::apply_toml` resolves any key through `feature_for_key`
+and enables it **without consulting `Stage`**; only `TuiAppServer` and some
+removed keys are skipped. So this is a real setting, not a supported one: it
+can be renamed or deleted in any release, and nothing warns first. Issue
+[#24750](https://github.com/openai/codex/issues/24750) postdates the merge and
+still reports the Default-mode failure, which is the flag being off, not the
+feature being absent.
+
+Because the setting lives in host config rather than in the skill, a skill
+depending on it works on one machine and not the next, with no signal beyond
+the `unavailable in <mode> mode` string.
+
+#### If the flag is removed
+
+Ranked, so a pivot does not have to start from scratch. Note that OpenAI's own
+Default-mode guidance in #12735 is to "prefer assumptions first and use
+`request_user_input` only when a question is unavoidable" — option 1 is the
+direction the product is pointing anyway.
+
+1. **Take the answers as arguments.** A skill invoked with its flags already set
+   needs no question. This usually deletes more than the question: any step that
+   exists only to build the choices (enumerating options to offer) goes with it.
+   Cheapest, and the only option that adds nothing.
+2. **Ask in prose.** End the turn with the question and read the reply from the
+   user's next message. Works in every mode, needs no tool and no flag; costs
+   structured parsing, which is trivial for a handful of choices.
+3. **Defaults plus a visible escape.** Proceed on a documented default and say
+   which one was assumed, so the user can re-run with an explicit flag. Good
+   where a wrong guess is cheap to redo.
+
+Not viable, for the record: a script that prompts on stdin. A tool call's stdin
+is not the user's terminal, so it hangs or reads EOF, and it rebuilds a prompt
+UI inside a subprocess to reach the same place as option 2.
+
+Do not confuse this with `ask_user_question`, a proposed tabbed-questionnaire
+tool in [codex#9926](https://github.com/openai/codex/issues/9926). That issue is
+closed and its PR [#9904](https://github.com/openai/codex/pull/9904) was closed
+unmerged; the issue text says outright to "keep existing `request_user_input`
+unchanged". Searching for the feature finds the unshipped name first.
+
 ### `!`-injection has no Codex equivalent
 
 Claude Code executes `` !`command` `` in a `SKILL.md` body at load time and
