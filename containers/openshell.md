@@ -47,6 +47,14 @@ A policy-denied host and a policy-allowed-but-dead host fail differently, and th
 
 `curl --connect-timeout` does not bound a request through the proxy — it only bounds the TCP connect to the proxy itself, which always succeeds immediately. If the proxy then stalls on an unreachable upstream, curl waits indefinitely. Measured: a request with `--connect-timeout 3` and no `--max-time` ran past 90 seconds with no response. Always set `--max-time` for reachability probes.
 
+### Fetch Service for Hosts Outside Policy
+
+A network policy can include an entry named `fetch-service` pointing at `172.30.0.21:8090`. It is opt-in: the operator turns it on from the host mid-session, so a policy read earlier in a session can be stale — re-read `/sandbox/source/openshell-policy.yaml` before concluding it is absent.
+
+`GET http://172.30.0.21:8090/` returns the literal usage string `use /fetch?url=<encoded-url>`. `GET http://172.30.0.21:8090/fetch?url=<percent-encoded-url>` returns the raw page bytes — full HTML, not converted to markdown; a docs page came back at ~3 MB and needed local tag-stripping to be readable.
+
+It exists for reaching hosts that are NOT in the network policy. The normal WebFetch path goes through the egress proxy, which answers `proxy refused the connection` for any host outside the policy — no retry or mirror changes that. The fetch service is the sanctioned way around it: it served `platform.openai.com` docs in a sandbox whose policy listed only Anthropic API hosts, an OTEL collector, package registries, and search engines. See [Policy Granularity](#policy-granularity) above for why it cannot substitute for a TLS-impersonating client.
+
 ## Network Policy Validation
 
 The `host` field in network policy rejects:
@@ -224,6 +232,12 @@ fatal: failed to write commit object
 ```
 
 The uploaded global git config enables SSH commit signing (`gpg.format=ssh`, `commit.gpgsign=true`) and `ssh-keygen` is not in the sandbox image. Any test that shells out to `git commit` fails, which reads as a broken test suite when it is purely environmental. To run such a suite, neutralize the global config for that invocation: `GIT_CONFIG_GLOBAL=/dev/null` plus `GIT_AUTHOR_NAME`, `GIT_AUTHOR_EMAIL`, `GIT_COMMITTER_NAME`, `GIT_COMMITTER_EMAIL`. In one Python repo this turned "5 failed, 53 errors" into a fully green suite with no code changes.
+
+A narrower override disables only the signing key and leaves the rest of the global config — including `user.name`/`user.email` — intact, so the identity variables are not needed: `GIT_CONFIG_COUNT=1 GIT_CONFIG_KEY_0=commit.gpgsign GIT_CONFIG_VALUE_0=false`. Observed turning 44 collection errors into a green suite in a Python repo whose test fixtures create throwaway git repos.
+
+### `/sandbox/.env` carries OTEL resource attributes into tests
+
+`/sandbox/.env` sets `OTEL_RESOURCE_ATTRIBUTES` (project path, `host.name`, `sandbox.source`, `sandbox.openshell_name`, `sandbox.profile`) alongside the other OTEL keys. Any code that reads that file as a telemetry-environment fallback picks up `OTEL_RESOURCE_ATTRIBUTES` even when the caller deliberately unset it. A test asserting "`OTEL_RESOURCE_ATTRIBUTES` is absent from the child environment" passes on the host and fails inside the sandbox, and the failure is purely environmental — the same test fails on unmodified code. Check `/sandbox/.env` before debugging any test that asserts on environment-variable absence.
 
 ## POSIX Semaphores Are Unavailable
 

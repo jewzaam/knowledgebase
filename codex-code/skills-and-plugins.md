@@ -252,7 +252,9 @@ from `claude -p`:
 - Session identity is `thread_id`, from the `thread.started` event.
 - `--output-schema <path>` takes a JSON Schema **file path**, and the schema
   must set `additionalProperties: false`. Claude Code's `--json-schema` is the
-  counterpart.
+  counterpart. See [structured-outputs.md](structured-outputs.md) for the full
+  supported/unsupported keyword subset, structural rules, size limits, and how
+  to adapt a schema without losing validation.
 - `-o` / `--output-last-message <path>` writes the final message to a file and
   still prints it.
 - `codex exec resume --last` or `codex exec resume <SESSION_ID>` continues a
@@ -271,6 +273,10 @@ cost has to compute it from a maintained price table, which makes the number an
 estimate rather than a measurement.
 
 ### Open defects against structured output
+
+See [structured-outputs.md](structured-outputs.md) for what the schema itself
+may and may not contain — these defects are about `--output-schema`'s
+integration with other `codex exec` features, not schema content.
 
 - Schema and resume do not compose — `codex exec resume` does not accept
   `--output-schema`
