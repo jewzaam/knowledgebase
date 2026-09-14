@@ -75,21 +75,93 @@ read 2026-09-14:
 
 ## Adapting a schema without losing validation
 
-Three transformations make a typical schema acceptable:
+### Composition and conditionals: convert to a discriminated union
 
-1. Delete the unsupported keywords.
-2. Force every property into `required`, and widen the genuinely-optional
-   ones to `anyOf: [<original schema>, {"type": "null"}]`. Strip the nulls
-   back out of the response before consuming it.
-3. Close every object with `additionalProperties: false`.
+`anyOf` is the one composition keyword strict mode accepts, and it is legal
+anywhere except the schema root. That makes it the target for a schema that
+uses `allOf` + `if`/`then`/`not` to express "field X only when field Y
+equals Z": rewrite the shared-object-plus-conditionals shape as `anyOf` over
+complete variants, one per discriminator value, each pinning the
+discriminator with `const` and declaring only its own fields under
+`additionalProperties: false`.
 
-Deleting a keyword does not have to mean losing the constraint it expressed.
-Keep the unmodified source schema and re-validate the agent's result against
-it locally, with retries — the constraint then holds after generation instead
-of during it. This matters most for the conditionals: a `remove` verdict that
-requires a `remove_reason`, or a `rescore` that requires new values, is
-expressible as `allOf` + `if`/`then` for Anthropic but has to survive as a
-local check for OpenAI.
+This is the correct approach, not a stylistic preference. The structural
+rule above — every key under `properties` must appear in `required`,
+recursively — makes a presence-based conditional meaningless once a schema
+is adapted, not just unsupported: `if action == "rescore" then required:
+["new_dimensions"]` is trivially satisfied because `new_dimensions` is
+already required unconditionally, and `then: {not: {required:
+["remove_reason"]}}` is unsatisfiable for the same reason. There is no way
+to express "field X is present only when field Y has value Z" as a
+conditional over a single object shape under strict mode — the all-required
+rule has already flattened the distinction before `if`/`then` would run.
+
+The union form is also lossless where deleting the conditional and
+re-validating locally is not: a `confirm` variant has no `remove_reason`
+property at all, so the model cannot emit one — the constraint is enforced
+during generation, which is what the conditional was for. Genuinely optional
+fields inside one variant still take the `anyOf: [<original schema>,
+{"type": "null"}]` widening (strip the nulls back out of the response before
+consuming it), and every object, including each variant, still needs
+`additionalProperties: false`.
+
+Condensed worked example — a review pipeline's verdict schema, `anyOf`
+inside an array's `items`, replacing four `allOf` + `if`/`then`/`not`
+conditionals:
+
+```json
+"verdicts": {
+  "type": "array",
+  "items": {
+    "anyOf": [
+      { "type": "object", "additionalProperties": false,
+        "required": ["finding_ref", "action", "reasoning"],
+        "properties": { "finding_ref": {...}, "action": {"type": "string", "const": "confirm"},
+                        "reasoning": {"type": "string"} } },
+      { "type": "object", "additionalProperties": false,
+        "required": ["finding_ref", "action", "new_dimensions", "reasoning"],
+        "properties": { "finding_ref": {...}, "action": {"type": "string", "const": "rescore"},
+                        "new_dimensions": {...}, "reasoning": {"type": "string"} } },
+      { "type": "object", "additionalProperties": false,
+        "required": ["finding_ref", "action", "remove_reason", "reasoning"],
+        "properties": { "finding_ref": {...}, "action": {"type": "string", "const": "remove"},
+                        "remove_reason": {"type": "string", "enum": ["not_real", "pre_existing", "positive_observation"]},
+                        "reasoning": {"type": "string"} } }
+    ]
+  }
+}
+```
+
+Verified exhaustively equivalent to the conditional form it replaced: every
+combination of action value and optional-field presence (37 documents across
+two schemas) validates identically against the old `allOf`/`if`/`then` form
+and the new union, with zero mismatches. Cost was about 700 characters of
+schema.
+
+Verified on both harnesses: a nested `anyOf` of `const`-discriminated
+variants is also accepted by Anthropic's `claude -p --json-schema` (probed
+against the live API with Haiku; it returned a correctly-shaped variant).
+The union form is portable across both providers; the conditional form is
+not — there is no reason to keep conditionals in a schema that must serve
+both.
+
+### Residual: stripping scalar bounds
+
+Once composition is converted to a union, the only unsupported keywords left
+to strip are scalar bounds — `minLength`, `maxLength`, `minProperties`, and
+the rest of the "explicitly not supported" list above that isn't a
+composition keyword. Dropping one of those costs only up-front enforcement
+of a bound. Keep the unmodified source schema and re-validate the agent's
+result against it locally, with retries — the constraint then holds after
+generation instead of during it.
+
+An adapter should refuse to drop a keyword whose value is an object or array
+(a subschema) rather than flattening it away. Silently dropping a subschema
+hands the agent a contract weaker than the one its output is later judged
+against, with nothing reporting the gap — the same silent-weakening failure
+this doc describes for the API's own rejection (see above), just relocated
+from the provider to the adapter. Raising there turns it into a loud,
+attributable error instead of a quiet one.
 
 Guard the adapter with a test that walks the adapted schema and asserts none
 of the unsupported keywords survive, for every schema the code sends. The

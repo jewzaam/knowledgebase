@@ -101,11 +101,16 @@ harnesses; see the Codex/OpenAI contrast below.
 | `if` / `then` / `else` | Conditional schemas. Works at root and nested. |
 | `not` | Negation. Works (tested nested inside `allOf` inside array items). |
 | `allOf` (nested) | Works inside properties and array items. |
+| `anyOf` (nested) | Works inside array items; tested with `const`-discriminated variants (a discriminated union) via `claude -p --json-schema` on Haiku. |
 | `enum` | Primitive values only. Works. |
 | `const` | Works. |
 | `additionalProperties: false` | Works and recommended. |
 | `required` | Works. |
 | `$ref` / `$defs` | Internal references only (no external URLs). Works. |
+
+This matters because nested `anyOf` of `const`-discriminated variants is the
+shape that ports to OpenAI strict mode (see the Codex/OpenAI contrast
+below), unlike `allOf`/`if`/`then`/`not`, which OpenAI rejects everywhere.
 
 ### Unsupported (causes 400 error)
 
