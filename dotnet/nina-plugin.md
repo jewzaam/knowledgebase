@@ -683,7 +683,7 @@ the recompile-invalidates-hash trap.
 14. **Do not** trust the install-folder `<api-version>` to be 4-segment
     — it is the 3-segment `3.0.0` (§1).
 
-## Appendix A — Canonical AssemblyInfo
+## Appendix A: Canonical AssemblyInfo
 
 ```csharp
 using System.Reflection;

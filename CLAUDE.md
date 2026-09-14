@@ -72,6 +72,10 @@ When adding a new knowledgebase doc:
 - [codex-code/model-context-window.md](codex-code/model-context-window.md) — catalog `context_window` vs `max_context_window` per model, the `model_context_window` config key (i64, no feature flag, no `model_max_output_tokens`), absent client-side clamp, `model_auto_compact_token_limit`/`_scope` riding on the effective window, `model_catalog_json` override, no offline way to read either effective value
 - [codex-code/skills-and-plugins.md](codex-code/skills-and-plugins.md) — `.agents/skills` discovery scopes, initial-list truncation budget, Agent Skills frontmatter vs Claude Code's dialect, absent `!`-injection, `request_user_input` as the AskUserQuestion counterpart (Plan-only by default, `default_mode_request_user_input` config flag to get Default mode, root-thread-only, max 3 questions, fallbacks if the flag goes) vs the unshipped `ask_user_question`, plugin-namespaced `$plugin:skill` invocation vs bare `$skill`, `.codex-plugin/plugin.json` and marketplace sources (legacy `.claude-plugin/` read, silent skip on unresolvable source), `codex exec` JSONL/`--output-schema` behavior and its token-only usage data
 
+## Containers
+
+- [containers/openshell-codex-nested-sandbox.md](containers/openshell-codex-nested-sandbox.md) — OpenShell blocks the nested user namespace required by Codex read-only Bubblewrap; use `danger-full-access` inside the outer sandbox and surface launch failures instead of empty results
+
 ## Common
 
 - [common/atlassian-api-auth.md](common/atlassian-api-auth.md) — Atlassian API token types, scoping, URL routing, auth methods, and network policy granularity
