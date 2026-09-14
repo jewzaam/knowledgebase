@@ -85,6 +85,11 @@ All constraints tested July 2026 via Workflow `agent(schema:)` with Haiku and
 Sonnet models. Results contradict earlier documentation that claimed many
 constraints were unsupported.
 
+This matrix describes Anthropic's StructuredOutput implementation only —
+Workflow `agent(schema:)`, the Agent SDK `schema:` parameter, and
+`claude -p --json-schema`. It does not transfer to other providers or
+harnesses; see the Codex/OpenAI contrast below.
+
 ### Supported (tested, confirmed working)
 
 | Constraint | Notes |
@@ -110,6 +115,27 @@ constraints were unsupported.
 | `anyOf` at schema root | Same 400 error | Same workaround. |
 | `oneOf` at schema root | Same 400 error | Same workaround. |
 | Recursive schemas | Not supported | Schemas with `$ref` cycles. |
+
+### Contrast with Codex / OpenAI Structured Outputs
+
+`codex exec --output-schema` sends the schema to OpenAI Structured Outputs in
+strict mode, whose accepted subset is far narrower than Anthropic's above and,
+on two points, close to its inverse:
+
+- OpenAI rejects `allOf`, `not`, `if`/`then`/`else`, `dependentRequired`, and
+  `dependentSchemas` **anywhere** in the schema, not just at the root —
+  `anyOf` is its only composition keyword. Anthropic accepts all of these when
+  nested and rejects composition only at the root (see tables above).
+- OpenAI supports recursive schemas; Anthropic does not.
+- OpenAI also requires every property to be listed in `required` and
+  `additionalProperties: false` on every object, recursively — Anthropic does
+  not.
+
+Practical consequence: a schema written against the matrix above will be
+rejected by Codex with a 400 `invalid_json_schema` before the agent runs,
+losing the whole turn. Do not assume portability between harnesses.
+
+Full accepted subset: [codex-code/structured-outputs.md](https://github.com/jewzaam/knowledgebase/blob/main/codex-code/structured-outputs.md).
 
 ### Not tested
 

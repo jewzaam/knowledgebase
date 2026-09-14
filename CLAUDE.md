@@ -71,6 +71,7 @@ When adding a new knowledgebase doc:
 - [codex-code/otel-native-telemetry.md](codex-code/otel-native-telemetry.md) — Codex hook/config file locations, project trust scoping, hook payload fields, `codex_turn_token_usage_sum` histogram token_type values, native OTEL export behavior
 - [codex-code/model-context-window.md](codex-code/model-context-window.md) — catalog `context_window` vs `max_context_window` per model, the `model_context_window` config key (i64, no feature flag, no `model_max_output_tokens`), absent client-side clamp, `model_auto_compact_token_limit`/`_scope` riding on the effective window, `model_catalog_json` override, no offline way to read either effective value
 - [codex-code/skills-and-plugins.md](codex-code/skills-and-plugins.md) — `.agents/skills` discovery scopes, initial-list truncation budget, Agent Skills frontmatter vs Claude Code's dialect, absent `!`-injection, `request_user_input` as the AskUserQuestion counterpart (Plan-only by default, `default_mode_request_user_input` config flag to get Default mode, root-thread-only, max 3 questions, fallbacks if the flag goes) vs the unshipped `ask_user_question`, plugin-namespaced `$plugin:skill` invocation vs bare `$skill`, `.codex-plugin/plugin.json` and marketplace sources (legacy `.claude-plugin/` read, silent skip on unresolvable source), `codex exec` JSONL/`--output-schema` behavior and its token-only usage data
+- [codex-code/structured-outputs.md](codex-code/structured-outputs.md) — `--output-schema` JSON Schema subset actually accepted by the OpenAI Responses API (rejection happens server-side, before the agent runs), supported/unsupported keyword lists, root/required/`additionalProperties` structural rules, size limits, adapting a schema without losing validation, contrast with Claude Code's inverse support matrix
 
 ## Containers
 
@@ -89,7 +90,7 @@ Standards counterpart: [standards/common/documentation-diagrams.md](https://gith
 
 ## Containers
 
-- [containers/openshell.md](containers/openshell.md) — OpenShell proxy architecture (HTTP/1.1 CONNECT, no gRPC), proxy chaining limits, host.containers.internal resolution, TLS fingerprint impersonation surviving the CONNECT tunnel opaquely
+- [containers/openshell.md](containers/openshell.md) — OpenShell proxy architecture (HTTP/1.1 CONNECT, no gRPC), proxy chaining limits, host.containers.internal resolution, TLS fingerprint impersonation surviving the CONNECT tunnel opaquely, opt-in fetch-service for hosts outside policy, `/sandbox/.env` OTEL_RESOURCE_ATTRIBUTES leaking into tests, narrower git commit.gpgsign override
 - [containers/podman-rootless-networking.md](containers/podman-rootless-networking.md) — pasta TAP vs interface-copy mode, rootless-netns debugging, bridge data path, pasta version regressions
 - [containers/terminal-multiplexers-in-sandboxes.md](containers/terminal-multiplexers-in-sandboxes.md) — screen/tmux/dtach inside Landlock-enforced sandboxes: `/dev/pts` PTY fix, terminal emulation vs Claude Code TUI, dtach raw passthrough as working solution
 
