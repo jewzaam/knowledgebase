@@ -6,8 +6,14 @@
 
 ## Available Hook Event Types
 
-Claude Code supports 17+ hook event types. Hooks are configured in
-`~/.claude/settings.json` (or project-level `.claude/settings.json`).
+Claude Code accepts 33 hook event types. Hooks are configured in
+`~/.claude/settings.json` (or project-level `.claude/settings.json`). Anything outside this list is
+rejected with `Unknown hook type "<name>"`.
+
+> Source: the `Im` array in the Claude Code bundle (`bin/claude.exe` is a Bun single-file
+> executable; the JS is embedded as plain text and greppable). Verified against 2.1.269. The
+> published docs at <https://code.claude.com/docs/en/hooks> lag this list — re-derive from the
+> binary on upgrade rather than trusting the count here.
 
 **OTEL gate:** Claude Code only emits an OTEL event for a hook type if at least one hook of that
 type is configured. No hook = no telemetry for that event type. To observe all events, register a
@@ -17,23 +23,57 @@ and `~/source/my-claude-stuff/docs/noop-hooks.md`.
 | Event | Description |
 |-------|-------------|
 | `PreToolUse` | Before tool execution. Exit 2 to block |
-| `PostToolUse` | After successful tool execution |
+| `PostToolUse` | After a successful tool execution. Fires per tool, may run concurrently for parallel calls |
 | `PostToolUseFailure` | Tool failure |
-| `UserPromptSubmit` | User submits a prompt |
+| `PostToolBatch` | Once after every tool call in a batch resolves, before the next model request. Carries `tool_calls[]` |
+| `Notification` | System notification (`message`, `notification_type`) |
+| `UserPromptSubmit` | User submits a prompt. `source`: user, sdk, system, loop_wakeup, schedule_wakeup, poll_event |
+| `UserPromptExpansion` | Slash command or MCP prompt expanded (`expansion_type`, `command_name`, `command_args`) |
+| `SessionStart` | Session begins. `source`: startup, resume, clear, compact, fork |
+| `SessionEnd` | Session ends. `reason`: clear, resume, logout, prompt_input_exit, other |
 | `Stop` | Response complete |
-| `Notification` | System notification |
+| `StopFailure` | Turn ended in error (`error`, `error_details`) |
+| `SubagentStart` | Subagent launched (`agent_id`, `agent_type`) |
+| `SubagentStop` | Subagent finished. Carries `background_tasks[]` and `session_crons[]` |
+| `PreCompact` | Before context compaction (`trigger`: manual/auto) |
+| `PostCompact` | After compaction (`compact_summary`) |
+| `PreModelSwitch` | Before a model switch. `source`: command, picker, sdk |
+| `PostModelSwitch` | After a model switch. Adds `source` values auto, resume |
 | `PermissionRequest` | Permission prompt |
-| `SessionStart` | Session begins |
-| `SessionEnd` | Session ends |
-| `SubagentStart` | Subagent launched |
-| `SubagentStop` | Subagent finished |
-| `PreCompact` | Before context compaction |
-| `Setup` | During setup/initialization |
+| `PermissionDenied` | Permission denied (`tool_name`, `tool_use_id`, `reason`) |
+| `Setup` | Setup/initialization (`trigger`: init/maintenance) |
 | `TeammateIdle` | Teammate is idle |
+| `TaskCreated` | Task created (`task_id`, `task_subject`) |
 | `TaskCompleted` | Task finishes |
-| `ConfigChange` | Config modified |
+| `Elicitation` | MCP server requests user input. Hook can auto-respond instead of showing the dialog |
+| `ElicitationResult` | User responded to an MCP elicitation. Hook can observe or override before it reaches the server |
+| `ConfigChange` | Config modified. `source`: user/project/local/policy settings, skills |
 | `WorktreeCreate` | Worktree created |
 | `WorktreeRemove` | Worktree removed |
+| `InstructionsLoaded` | A memory/instructions file loaded (`memory_type`, `load_reason`, `file_path`) |
+| `CwdChanged` | Working directory changed (`old_cwd`, `new_cwd`) |
+| `FileChanged` | A watched file changed. Only fires for paths a hook registered via `watchPaths` in its own output |
+| `DirectoryAdded` | Directory added. `source`: slash_command (/add-dir) or register_repo_root (SDK) |
+| `MessageDisplay` | Each batch of newly completed lines while an assistant message streams. Display-only |
+
+## Server-Side Tools Fire No Hooks
+
+The advisor (`/advisor`, "consult a stronger model at key moments") runs **server-side**. In the
+response stream it arrives as a `server_tool_use` block named `advisor` and returns an
+`advisor_tool_result` block; no local tool executes. Consequences:
+
+- No `PreToolUse` / `PostToolUse` / `PostToolUseFailure` hook fires for it.
+- No `tool_decision` / `tool_result` OTEL event. The whole consultation sits inside one in-flight
+  `api_request`, which emits only on completion.
+- The only client-side telemetry is Statsig (`tengu_advisor_tool_call`, `tengu_advisor_tool_result`,
+  `tengu_advisor_tool_error`) — not the `com.anthropic.claude_code.events` OTEL pipeline.
+
+So an advisor turn is a hook-silent, OTEL-silent gap of arbitrary length in the middle of a turn.
+Any session-state rule that infers WORKING from recent activity events (e.g. a
+`count_over_time(... [60s])` recording rule) reports the session as not working for the duration.
+Edge-based state — WORKING from `UserPromptSubmit` until `Stop`/`StopFailure`, as the state machine
+below describes — does not have this failure mode. No hook registration fixes it; there is no
+client-side event to register for.
 
 ## Hook Input Contract
 
