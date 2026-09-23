@@ -193,12 +193,71 @@ Native events enable session state derivation:
 
 | State | Signals |
 |-------|---------|
-| WORKING | api_request, tool_decision, tool_result events present |
+| WORKING | newest of api_request, tool_decision, tool_result, skill_activated, subagent_completed, user_prompt is newer than the last Stop |
 | READY | hook_event=Stop is most recent significant event |
 | PERMISSION_REQUIRED | hook_event=PermissionRequest fired |
 | AWAITING_INPUT | inferred from READY + prolonged absence |
 
 Agent activity detectable via `query_source` values starting with `agent:`.
+
+Derive WORKING by **ordering**, not by counting events in a recent window. A
+presence count (`count_over_time(...[60s])` or similar) reads a session as not
+working through any turn that emits nothing for the window's length, and
+server-side tools make that routine rather than rare — see below.
+
+## Server-Side Tools Are Invisible to OTEL
+
+The advisor (`/advisor`) executes on Anthropic's side. In the response stream it
+arrives as a `server_tool_use` block named `advisor` and returns an
+`advisor_tool_result` block; no local tool runs. Verified by reading the Claude
+Code bundle at 2.1.269 — `bin/claude.exe` is a Bun single-file executable with
+the JS embedded as plain text, so the implementation is greppable.
+
+Consequences for telemetry:
+
+- No `tool_decision` and no `tool_result` event, and no hook of any kind fires
+  (`PreToolUse`/`PostToolUse` are local-execution events).
+- The whole consultation sits inside one in-flight `api_request`, and that event
+  emits only on completion.
+- The only client-side telemetry is Statsig (`tengu_advisor_tool_call`,
+  `tengu_advisor_tool_result`, `tengu_advisor_tool_error`) — not the
+  `com.anthropic.claude_code.events` OTEL pipeline.
+
+So an advisor turn is an OTEL-silent gap of arbitrary length in the middle of a
+turn. Duration is not lost: the completing `api_request` carries a `duration_ms`
+spanning the whole request, advisor time included. What is lost is *liveness* —
+any state rule that counts recent events reports the session as idle for the
+duration. No hook registration fixes it; there is no client-side event to
+register for.
+
+### Advisor cost and tokens are unattributable
+
+The cost function in the bundle is:
+
+```text
+cost = input_tokens*rate + output_tokens*rate + cache_read_input_tokens*rate
+     + cache_creation cost
+     + (usage.server_tool_use?.web_search_requests ?? 0) * webSearchRequests_rate
+```
+
+`web_search_requests` is the **only** `server_tool_use` counter the client
+consumes. `usage.server_tool_use` is parsed and stored, but nothing else reads
+it, and there is no `advisor_*` token or cost identifier anywhere in the bundle.
+The `advisor_tool_result` content block parses only `type`, `stop_reason`,
+`text`, and `error_code` — no usage.
+
+Whether the advisor model's tokens are rolled into the parent message's
+`input_tokens`/`output_tokens` is a server-side question the client cannot
+answer. Both possibilities are bad for accounting:
+
+- Rolled in → priced at the **main** model's rate, not the advisor's.
+- Not rolled in → absent from `cost_usd` entirely.
+
+Either way there is no separate line item, so nothing downstream (statusline
+`total_cost_usd`, `claude_skill_cost_usd`, per-model dashboards) can attribute
+advisor spend. To settle which case applies: run one turn with `/advisor <model>`
+and one comparable turn without, then compare the `api_request` `output_tokens`
+and `cost_usd` in Loki against the Anthropic console for the same window.
 
 ## user_prompt Field Structure
 
