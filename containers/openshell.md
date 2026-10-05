@@ -210,6 +210,28 @@ cd /tmp/apt && apt-get $A download ripgrep && dpkg -x ./*.deb /tmp/apt/root
 
 `Dir::State` must be overridden too, not just `Dir::State::Lists` and `Dir::Cache` — without it apt fails on `/var/lib/apt/extended_states`. This makes a read-only Debian mirror grant genuinely useful: a session can identify a package, confirm it is the right one, extract a working binary, and use it directly from the extracted path, without ever needing install permission.
 
+### Xvfb extracted this way starts but cannot activate its keyboard
+
+The same `apt-get download` + `dpkg -x` sequence applied to `xvfb` plus its
+runtime libs (`libunwind8 libgl1 libpixman-1-0 libxfont2 libglvnd0 libglx0
+libfontenc1 libglx-mesa0 xkb-data x11-xkb-utils libxkbfile1`) produces an
+`Xvfb` binary that runs, but every invocation exits with:
+
+```text
+Fatal server error: Failed to activate virtual core keyboard
+```
+
+The server invokes `xkbcomp` using a compiled-in directory
+(`XkbBinDirectory`, format string `"%s%sxkbcomp"`) that points under
+`/usr/bin`, not wherever the extraction landed the binary. Passing `-xkbdir
+<extracted>/usr/share/X11/xkb` does not fix it — that flag only redirects the
+keymap data path, not the `xkbcomp` lookup. `-xkbcompdir` and `-kb` are both
+"Unrecognized option" for this build (Debian trixie, xorg 21.1.16). There is
+no flag on this build that relocates the `xkbcomp` search path, so Xvfb
+obtained this way cannot be made to start. Tkinter (or any X11 app) cannot be
+exercised against a real display inside an OpenShell sandbox by this route;
+Xvfb needs to be baked into the sandbox image instead.
+
 ## Uploaded Host State That Does Not Run in the Sandbox
 
 ### An uploaded `.venv` is unusable
