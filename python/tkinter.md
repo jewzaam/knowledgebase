@@ -82,11 +82,10 @@ landing in a terminal, on a borderless always-visible session-monitor
 dashboard. No key binding on the window, including `bind_all`, ever sees the
 key, because the window was never the focused widget.
 
-The workaround in use is calling `window.focus_force()` immediately before
-`tk_popup()`. Whether `focus_force()` reliably takes focus for a dock-type
-window under Mutter has NOT been verified for the menu case specifically —
-the same call is used elsewhere in the app for a type-to-filter search icon.
-Consequence of the workaround: focus stays on the Tk window after the menu
+Calling `window.focus_force()` immediately before `tk_popup()` fixes it:
+verified on a `-type dock` window under GNOME/Mutter via XWayland, where the
+shortcut letter then reached the window's `<Key>` binding. Consequence:
+focus stays on the Tk window after the menu
 closes; Tk has no mechanism to hand focus back to the application that held
 it before the menu was posted.
 
