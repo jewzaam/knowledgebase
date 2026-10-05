@@ -84,7 +84,7 @@ This project's discoveries live in the [Knowledgebase](https://github.com/jewzaa
 
 | Doc | Description |
 |---|---|
-| [OpenShell](containers/openshell.md) | Proxy architecture (HTTP/1.1 CONNECT, no gRPC), host.containers.internal resolution, TLS fingerprint impersonation surviving the CONNECT tunnel |
+| [OpenShell](containers/openshell.md) | Proxy architecture (HTTP/1.1 CONNECT, no gRPC), host.containers.internal resolution, TLS fingerprint impersonation surviving the CONNECT tunnel, Xvfb extracted via apt failing on xkbcomp path |
 | [Codex Nested Sandbox Under OpenShell](containers/openshell-codex-nested-sandbox.md) | Nested Codex read-only Bubblewrap fails under OpenShell process policy; use `danger-full-access` inside the outer sandbox and report launch failures |
 | [Podman Rootless Networking](containers/podman-rootless-networking.md) | Pasta TAP vs interface-copy mode, rootless-netns debugging, bridge data path, pasta version regressions |
 | [Terminal Multiplexers in Sandboxes](containers/terminal-multiplexers-in-sandboxes.md) | screen/tmux/dtach inside Landlock-enforced sandboxes: `/dev/pts` PTY fix, terminal emulation vs Claude Code TUI, dtach raw passthrough as working solution |
@@ -126,7 +126,7 @@ This project's discoveries live in the [Knowledgebase](https://github.com/jewzaa
 | Doc | Description |
 |---|---|
 | [Cross-Platform](python/cross-platform.md) | Microsoft Store alias mechanism; SAC blocks pip .exe shims |
-| [Tkinter](python/tkinter.md) | Menu keyboard shortcuts: underline parameter is visual only, XWayland focus issues, bind_all() requirement; text tag bindings vs embedded widgets for row controls; synthesizing clicks on text tags |
+| [Tkinter](python/tkinter.md) | Menu keyboard shortcuts: underline parameter is visual only, XWayland focus issues, bind_all() requirement, toplevel `<Key>` handler starving bind_all, deriving shortcuts from underline, dock-type/overrideredirect windows not taking click focus; text tag bindings vs embedded widgets for row controls; synthesizing clicks on text tags |
 | [Web Frameworks](python/web-frameworks.md) | FastAPI/uvicorn HTTPS with self-signed certs; browser acceptance, curl -k, dev vs production TLS |
 | [ddgs Metasearch](python/ddgs-metasearch.md) | `ddgs` is a nine-backend metasearch layer; `ENGINES` registry; silent fallback on bad backend names; result diversity per call vs across calls; wikipedia/grokipedia as lookups; yahoo is Bing-powered; TLS fingerprint as anti-bot discriminator |
 

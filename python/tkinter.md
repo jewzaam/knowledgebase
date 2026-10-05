@@ -50,6 +50,46 @@ def show_popup_menu(event):
 The `underline` parameter remains useful for visual consistency, but treat it
 as decoration only. Functional keyboard shortcuts need explicit bindings.
 
+### A window-level `<Key>` handler starves `bind_all` shortcuts
+
+Tk dispatches a key event through the focus widget's bindtags in order:
+widget, class, toplevel, `all`. `bind_all()` is the last tag. If the
+toplevel has a generic `<Key>` binding (type-to-filter, for instance) that
+returns `"break"` for printable characters, it runs first and the `bind_all`
+menu shortcut never fires — the letter lands in the filter instead. In that
+case dispatch the menu shortcut from inside the `<Key>` handler, ahead of
+its own logic, while the menu is mapped.
+
+### Deriving shortcuts from the underline
+
+A parallel key→command list per menu is unnecessary. The menu already holds
+the mapping: walk `range(menu.index("end") + 1)`, skip entries whose
+`menu.type(i)` is not `command`/`checkbutton` or whose `state` is
+`disabled`, and match `label[underline]` against the pressed character.
+`menu.invoke(i)` then runs the entry, and toggles a checkbutton's variable
+the same way a click does. `entrycget(i, "underline")` is `-1` when
+unset.
+
+### Dock-Type and Override-Redirect Windows Don't Take Focus on Click
+
+A Tk toplevel set to `-type dock` (Linux, observed under GNOME/Mutter via
+XWayland) or using `overrideredirect(True)` does not receive keyboard focus
+when the user clicks it. Right-clicking such a window and posting a context
+menu with `tk_popup()` therefore leaves keyboard focus wherever it already
+was — the previously focused application — and the pressed shortcut letter
+is typed into that application instead of invoking the menu entry: observed
+landing in a terminal, on a borderless always-visible session-monitor
+dashboard. No key binding on the window, including `bind_all`, ever sees the
+key, because the window was never the focused widget.
+
+The workaround in use is calling `window.focus_force()` immediately before
+`tk_popup()`. Whether `focus_force()` reliably takes focus for a dock-type
+window under Mutter has NOT been verified for the menu case specifically —
+the same call is used elsewhere in the app for a type-to-filter search icon.
+Consequence of the workaround: focus stays on the Tk window after the menu
+closes; Tk has no mechanism to hand focus back to the application that held
+it before the menu was posted.
+
 ## Unicode Rendering
 
 Tkinter on Linux (with Noto Sans or similar fonts) cannot render Unicode
