@@ -106,3 +106,23 @@ hook path, not that native token metrics have been exported.
 
 References: [Codex observability configuration](https://learn.chatgpt.com/docs/config-file/config-advanced#observability-and-telemetry),
 [OTLP exporter specification](https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/protocol/exporter.md).
+
+## Managed app-server environment
+
+In Codex CLI 0.162.1, the managed app-server daemon can reuse the environment
+from the client that started it for later client sessions. As a result, command
+environments and native OTEL `project` labels can reflect the daemon-start
+project even when the current client's wrapper prints the correct
+`OTEL_RESOURCE_ATTRIBUTES.project` value. Separate Codex clients do not by
+themselves guarantee separate daemon environments.
+
+The installed CLI's `codex --no-daemon` option bypasses the shared daemon even
+when one is already running. `codex features disable daemon_auto_start`
+prevents automatic daemon startup. Do not assume that it disables attachment
+to an already-running server. Per-session environment isolation requires
+`--no-daemon` or a separate, explicitly isolated app-server.
+
+Source note: [Codex config basics](https://learn.chatgpt.com/docs/config-file/config-basic)
+describes setting feature flags to `false` under `[features]`, but does not
+separately document the exact `daemon_auto_start` flag. That flag was present
+in the installed CLI version noted above.
