@@ -264,13 +264,47 @@ from `claude -p`:
 - `--ignore-user-config` skips `$CODEX_HOME/config.toml`; `--ignore-rules`
   skips execpolicy `.rules` files.
 
-### No cost is reported, only tokens
+### Thread cost is a separate backend estimate
 
-`turn.completed` carries `usage` with `input_tokens`, `cached_input_tokens`,
-`output_tokens`, and `reasoning_output_tokens`. There is no equivalent of the
-Claude CLI's `total_cost_usd`. Any per-agent budget cap built on a measured
-cost has to compute it from a maintained price table, which makes the number an
-estimate rather than a measurement.
+`codex exec --json`'s `turn.completed.usage` and local rollout JSONL
+`token_usage_record` contain token counts, not a USD cost field. The TUI's
+`estimated-thread-cost` status item gets its value separately from the Codex
+backend; it is not calculated locally from a price table. The TUI calls the
+app-server's `account/usage/read` request with a thread ID. Its
+`result.threadUsage` may contain `estimatedUsageUsdMicros` and
+`estimatedUsageCreditsMicros`; divide the USD value by 1,000,000 for dollars.
+The USD field is optional, and the request/result can arrive asynchronously.
+It is an estimate, not an invoice.
+
+To query it through the authenticated app-server, start `codex app-server` and
+send these JSON-RPC messages over its stdio transport. This example shows the
+client requests and representative server responses in sequence; wait for each
+response before sending the next client message. Replace `THREAD_ID` with the
+Codex thread ID. The initialize response's `codexHome` varies by machine.
+
+```jsonl
+{"id":1,"method":"initialize","params":{"clientInfo":{"name":"cost-reader","title":"Cost reader","version":"1.0.0"},"capabilities":{"experimentalApi":true}},"jsonrpc":"2.0"}
+{"id":1,"result":{"userAgent":"codex/1.0.0","codexHome":"/home/user/.codex","platformFamily":"unix","platformOs":"linux"},"jsonrpc":"2.0"}
+{"method":"initialized","jsonrpc":"2.0"}
+{"id":2,"method":"account/usage/read","params":{"threadId":"THREAD_ID"},"jsonrpc":"2.0"}
+{"id":2,"result":{"threadUsage":{"threadId":"THREAD_ID","estimatedUsageUsdMicros":12345,"estimatedUsageCreditsMicros":12345,"groups":[]}},"jsonrpc":"2.0"}
+```
+
+The example micros values are illustrative; the USD field may be absent. Do not
+send the next message before receiving the preceding response; sending all
+protocol lines at once before the initialization handshake completed produced
+no result. The app-server uses authenticated backend requests internally:
+ChatGPT accounts use
+`/wham/usage/thread_usage/query`, while the Codex API path uses
+`/api/codex/usage/thread_usage/query`. Those internal routes accept
+`thread_ids` and return per-thread estimated USD and credit micros. Prefer the
+app-server request, which reuses Codex authentication, over calling these
+backend routes directly.
+
+Sources: [TUI usage request](https://github.com/openai/codex/blob/main/codex-rs/tui/src/app/background_requests.rs),
+[app-server request handler](https://github.com/openai/codex/blob/main/codex-rs/app-server/src/request_processors/account_processor.rs),
+[status item rendering](https://github.com/openai/codex/blob/main/codex-rs/tui/src/chatwidget/status_surfaces.rs),
+[backend thread-usage client](https://github.com/openai/codex/blob/main/codex-rs/backend-client/src/client/thread_usage.rs).
 
 ### Open defects against structured output
 
@@ -314,6 +348,10 @@ This matters for anything that writes the invocation down — an
 `agents/openai.yaml` `default_prompt`, a README, or a skill body that tells the
 user how to re-run it. The unqualified form silently stops resolving the moment
 the skill ships inside a plugin.
+
+Codex invokes skills with `$skill` or `$plugin:skill`, not slash commands.
+When porting a skill, do not carry over a Claude-only `/skill` invocation
+trigger literally; it can reject a valid Codex `$skill` invocation.
 
 ## Sources
 
