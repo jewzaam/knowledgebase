@@ -79,6 +79,7 @@ This project's discoveries live in the [Knowledgebase](https://github.com/jewzaa
 | [gdbus GVariant Escaping](common/gdbus-gvariant-escaping.md) | gdbus GVariant double-escaping of quotes in D-Bus extension output, JSON parsing fix |
 | [Git Remote Discovery](common/git-remote-discovery.md) | Why `origin`/`upstream` are conventions not contracts |
 | [Mermaid Rendering](common/mermaid-rendering.md) | Node placement via connections, style color inheritance, subgraph nesting contrast, legend rendering, label quoting |
+| [VS Code / GNOME Window Calls](common/vscode-gnome-window-calls.md) | `wm_class` is `com.microsoft.VSCode` not `code`; shared pid across windows makes terminal-tab attribution unobservable; `List` response shape, null-title guard, title-to-workspace extraction; `gdbus` vs `psutil.children(recursive=True)` call cost |
 
 ## [Containers](containers/)
 

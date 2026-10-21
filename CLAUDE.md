@@ -85,6 +85,7 @@ When adding a new knowledgebase doc:
 - [common/gdbus-gvariant-escaping.md](common/gdbus-gvariant-escaping.md) — gdbus GVariant double-escaping of quotes in D-Bus extension output, JSON parsing fix
 - [common/git-remote-discovery.md](common/git-remote-discovery.md) — why `origin`/`upstream` are conventions not contracts
 - [common/mermaid-rendering.md](common/mermaid-rendering.md) — Mermaid rendering behaviors: node placement via connections, style color inheritance, subgraph nesting contrast, legend rendering, label quoting
+- [common/vscode-gnome-window-calls.md](common/vscode-gnome-window-calls.md) — GNOME `window-calls` extension facts for VS Code windows: `wm_class` is `com.microsoft.VSCode` not `code`, shared pid across windows making terminal-tab attribution unobservable, `List` response shape and null-title guard, title-to-workspace extraction, `gdbus` vs `psutil.children(recursive=True)` call cost
 
 Standards counterpart: [standards/common/documentation-diagrams.md](https://github.com/jewzaam/standards/blob/main/common/documentation-diagrams.md) — prescriptive rules for diagram structure
 
