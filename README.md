@@ -44,6 +44,7 @@ This project's discoveries live in the [Knowledgebase](https://github.com/jewzaa
 | [fabcheck](build/fabcheck.md) | Fabcheck tool internals: language coverage, dist-name resolution modes, gaps |
 | [GitLab Container Registry](build/gitlab-container-registry.md) | Resolving an image tag to a manifest digest via the GitLab Container Registry API; repository-id path requirement; multi-arch tag size/revision fields |
 | [GHCR Publishing](build/ghcr-publish.md) | Why fine-grained PATs fail, classic PAT scoping, OCI label linkage mechanics, first-publish-private behavior |
+| [PyInstaller Windows Installer](build/pyinstaller-windows-installer.md) | PyInstaller/Inno Setup behaviors: astropy hook vs pytest, `copy_metadata`, hiddenimports, GUI+console exes, Inno Setup missing from GitHub Windows runners, conflicting `git+` pins |
 | [Local Workflow Testing](build/local-workflow-testing.md) | How act works, runner image internals, security risks, runner-image differences from GitHub-hosted |
 
 ## [Claude Code](claude-code/)

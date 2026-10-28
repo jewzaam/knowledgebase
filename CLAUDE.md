@@ -52,6 +52,7 @@ When adding a new knowledgebase doc:
 - [build/ghcr-publish.md](build/ghcr-publish.md) — why fine-grained PATs fail, classic PAT scoping, OCI label linkage mechanics, first-publish-private behavior
 - [build/local-workflow-testing.md](build/local-workflow-testing.md) — how act works, runner image internals, security risks, runner-image differences from GitHub-hosted
 - [build/fabcheck.md](build/fabcheck.md) — fabcheck tool internals: language coverage, dist-name resolution modes, known gaps
+- [build/pyinstaller-windows-installer.md](build/pyinstaller-windows-installer.md) — PyInstaller/Inno Setup Windows installer behaviors: astropy hook failing with pytest installed, `copy_metadata` for importlib.metadata version reads, hiddenimports for run-time imports, one-Analysis GUI+console exes, Linux binutils need, Inno Setup absent from GitHub Windows runners, conflicting `git+` pins
 - [build/gitlab-container-registry.md](build/gitlab-container-registry.md) — resolving an image tag to a manifest digest via the GitLab Container Registry API
 
 ## Claude Code
