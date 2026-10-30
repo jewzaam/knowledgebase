@@ -29,7 +29,7 @@ are invisible unless that path is added to the `skills` config array.
 
 The compatibility roots are a discovery convenience only. They change where
 files are read from, not how the content is interpreted — see
-[No `!` injection](#no-injection).
+[No `!` injection](#no--injection).
 
 ## Skill forms and IDs
 
