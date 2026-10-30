@@ -46,7 +46,9 @@ def heading_to_anchor(heading):
     text = re.sub(r"\[([^\]]*)\]\([^)]*\)", r"\1", text)
     text = text.lower()
     text = re.sub(r"[^\w\s-]", "", text)
-    text = re.sub(r"[\s]+", "-", text)
+    # Each whitespace char becomes its own hyphen, matching GitHub: removing
+    # punctuation (`!`, backticks) leaves adjacent spaces, which slug to `--`.
+    text = re.sub(r"\s", "-", text)
     text = text.rstrip("-")
     return text
 
