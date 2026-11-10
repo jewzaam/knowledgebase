@@ -5,8 +5,9 @@
 Where the two harnesses diverge in ways that change daily workflow. The focus is
 the permission interaction, because that is where the gap is widest and least
 documented. Mechanism-level detail for OpenCode lives in
-[permissions.md](permissions.md) and [skills.md](skills.md); the Claude Code side
-of skill execution is in [claude-code/skills.md](../claude-code/skills.md).
+[permissions.md](permissions.md), [plugins.md](plugins.md), and
+[skills.md](skills.md); the Claude Code side of skill execution is in
+[claude-code/skills.md](../claude-code/skills.md).
 
 > OpenCode docs: [permissions](https://opencode.ai/v2/docs/permissions),
 > [policies](https://opencode.ai/v2/docs/policies),
@@ -61,6 +62,26 @@ part of the approval.
   `once` / `always` / `reject`; anything about layout or field visibility is the
   client's choice and may change without a docs update.
 
+## Hooks and plugins
+
+Claude Code hooks are external commands registered per lifecycle event: the
+harness sends JSON on stdin, and `PreToolUse` exits 2 to block. OpenCode V2 has
+no per-event command protocol. A plugin registers in-process callbacks instead:
+
+| Need | Claude Code | OpenCode V2 |
+|------|-------------|-------------|
+| Gate a tool call | `PreToolUse` hook, exit 2 | `tool.execute.before` throw, or `permission.evaluate` set `effect = "deny"` |
+| Inspect a result | `PostToolUse` hook | `tool.execute.after` mutate `result` |
+| React to lifecycle | `SessionStart`, `SessionEnd`, `PreCompact`, notifications | No per-event command; subscribe to events or use the session/model hooks |
+| Run an external checker | Native: any executable reading stdin | Plugin must spawn it; no exit-code protocol |
+
+`permission.evaluate` is the closer analogue for permissions: it receives the
+action, its resources, and the resolved effect, and can overwrite that effect to
+`deny`. `tool.execute.before` is the closer analogue when the check needs the
+parsed tool input, such as a patch body or a file path. Neither is a sandbox, and
+a policy `tool.use` deny still applies after both. See
+[plugins.md](plugins.md).
+
 ## Default posture
 
 Claude Code's Manual mode prompts before edits, shell commands, and most network
@@ -109,7 +130,8 @@ permissions as guardrails, not containment.
 3. Replace Claude's default-deny posture with an explicit catch-all `ask`. Without
    it, OpenCode stays permissive no matter how many narrow `deny` rules are added.
 4. Move any behavior that must not depend on model compliance from instructions
-   into permissions or policies. `AGENTS.md` and `CLAUDE.md` are both advisory.
+   into permissions, policies, or a plugin. `AGENTS.md` and `CLAUDE.md` are both
+   advisory.
 5. Budget for the `!` injection gap if you reuse Claude skills, and for
    `CLAUDE.md` not being discovered.
 
