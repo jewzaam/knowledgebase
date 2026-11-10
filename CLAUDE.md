@@ -79,7 +79,8 @@ When adding a new knowledgebase doc:
 
 - [opencode/permissions.md](opencode/permissions.md) — permission model: base `*:* allow`, catch-all `*:* ask` flip, `external_directory` checked separately from read/edit so a blanket edit allow leaks into dynamically approved dirs, glob semantics with no regex or negation, `~`/`$HOME`-only expansion, relative-vs-absolute resources and the `edit * allow` + `edit /* ask` project-scoping trick, Plan agent's unrestricted shell
 - [opencode/skills.md](opencode/skills.md) — skill discovery from `~/.claude/skills` and `.claude/skills`, skills are not slash commands, absent `!` command injection so Claude skills silently lose their pre-flight, skill permission gating by ID
-- [opencode/vs-claude-code.md](opencode/vs-claude-code.md) — harness differences, centered on permission interaction: Claude shows the exact rule and accepts a note on allow or deny, OpenCode's "Allow always" persists a tool-chosen pattern with no pre-save edit; also default posture, rule precedence, modes vs agents, instruction files and skills, and isolation gaps
+- [opencode/plugins.md](opencode/plugins.md) — V2 plugin shape and loading paths, `tool.execute.before`/`after`, mutable `permission.evaluate` effect, shell/session hooks, external-guard bridge pattern, absent lifecycle/exit-code protocol, and unverified loader details
+- [opencode/vs-claude-code.md](opencode/vs-claude-code.md) — harness differences, centered on permission interaction: Claude shows the exact rule and accepts a note on allow or deny, OpenCode's "Allow always" persists a tool-chosen pattern with no pre-save edit; also default posture, rule precedence, modes vs agents, hooks vs plugins, instruction files and skills, and isolation gaps
 
 ## Containers
 

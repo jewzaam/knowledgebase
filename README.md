@@ -130,7 +130,8 @@ This project's discoveries live in the [Knowledgebase](https://github.com/jewzaa
 |---|---|
 | [OpenCode permissions](opencode/permissions.md) | OpenCode V2 permission model: default allow base policy, catch-all ask, `external_directory` as an independent check, glob semantics with no regex or negation, limited `~`/`$HOME` expansion, relative vs absolute resources, Plan agent shell behavior |
 | [OpenCode skills](opencode/skills.md) | Skill discovery including Claude-compatible directories, skills as model-loaded rather than slash commands, absent `!` command injection |
-| [OpenCode vs Claude Code](opencode/vs-claude-code.md) | Harness differences: permission prompt transparency, annotating allow/deny, editing a saved rule, default posture, precedence, modes vs agents, instruction files, isolation |
+| [OpenCode plugins](opencode/plugins.md) | V2 plugin shape and loading paths, tool/permission/shell/session hooks, mutable `permission.evaluate`, external-guard bridge, absent lifecycle and exit-code protocol |
+| [OpenCode vs Claude Code](opencode/vs-claude-code.md) | Harness differences: permission prompt transparency, annotating allow/deny, editing a saved rule, default posture, precedence, modes vs agents, hooks vs plugins, instruction files, isolation |
 
 ## [Python](python/)
 

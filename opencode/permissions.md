@@ -236,6 +236,34 @@ later and therefore wins:
 Within one file, statements keep their written order. A repository `allow` cannot
 lift a global `deny`, and an organization `allow` lifts a lower-authority `deny`.
 
+## Plugin evaluate override
+
+A V2 plugin can register `ctx.permission.hook("evaluate", ...)`. The callback
+receives the session, action, resources, and resolved effect, and may overwrite
+`effect` to `deny` and set `message`. This is the in-process point for logic a
+glob cannot express — command chains, flags before a subcommand, path tokens
+inside a shell command, and patch target paths. It is part of permission
+evaluation; a `tool.use` policy deny is independent and still applies. See
+[plugins.md](plugins.md).
+
+## Emulating `acceptEdits`
+
+OpenCode has no permission modes, but rule order reproduces Claude's
+`acceptEdits` posture. In-project paths are matched relative and external paths
+absolute, so:
+
+```jsonc
+[
+  { "action": "edit", "resource": "*",  "effect": "allow" },
+  { "action": "edit", "resource": "/*", "effect": "ask"   }
+]
+```
+
+allows edits inside the project and asks for every absolute path. Put any
+specific external allow after the `/*` rule and every sensitive deny after both,
+because the last match wins. The `external_directory` check remains independent:
+approving a boundary does not by itself grant a read or edit.
+
 ## Saved approvals
 
 An `ask` resolution can be answered three ways:
