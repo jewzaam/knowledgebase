@@ -53,6 +53,7 @@ This project's discoveries live in the [Knowledgebase](https://github.com/jewzaa
 |---|---|
 | [Agent SDK Usage Data](claude-code/agent-sdk-usage-data.md) | Extracting cost, token, context, and rate-limit data from the Agent SDK |
 | [Hook State Transitions](claude-code/hook-state-transitions.md) | Hook event types, state machines, and configuration |
+| [Model Restrictions](claude-code/model-restrictions.md) | `availableModels` allowlist scope and prefix matching, managed-only `deniedModels`, `enforceAvailableModels` scope conflict, the Default picker row and why no key hides it, precedence chain, gateway discovery `claude`/`anthropic` substring filter, `modelOverrides` key rules |
 | [OAuth Tokens](claude-code/oauth-tokens.md) | Anthropic OAuth token taxonomy, endpoint compatibility, error-envelope quirks, `~/.claude.json` auth-file requirement, K8s Secret tmpfs reset |
 | [Plugins](claude-code/plugins.md) | Plugin caching behavior, env vars, marketplace mechanics |
 | [Settings Rewrites](claude-code/settings-json-rewrites.md) | What survives a `settings.json` rewrite: top-level unknown keys yes, nested hook/rule keys no, command strings and their shell comments yes |
