@@ -10,7 +10,8 @@ where permissions stop and policies begin.
 > Provenance: [jewzaam/my-opencode-stuff](https://github.com/jewzaam/my-opencode-stuff)
 > (source repo), [jewzaam/standards](https://github.com/jewzaam/standards/)
 > (standards repo), [permissions](https://opencode.ai/v2/docs/permissions) and
-> [policies](https://opencode.ai/v2/docs/policies) (OpenCode docs).
+> [policies](https://opencode.ai/v2/docs/policies) (OpenCode docs), and the
+> `@opencode/core@2.2.7` matcher in `dist/chunks/skill-1aqsckx4.js`.
 
 ## Default base policy
 
@@ -113,8 +114,11 @@ Patterns are whole-value wildcards over normalized values
 There is no regex mode, no alternation, no character classes, and no negation
 operator. The pattern must match the entire normalized value, so a substring
 pattern in the middle of a path matches nothing unless the surrounding text is
-accounted for with `*`. `**` is not a distinct token — two adjacent `*` admit
-exactly the same set of values as one.
+accounted for with `*`. `**` is accepted but is not a distinct token: the
+matcher replaces every `*` with `.*`, so `**` compiles to `.*.*` and matches
+exactly the same values as one `*` (`@opencode/core@2.2.7`,
+`dist/chunks/skill-1aqsckx4.js`). Use one `*`; a double star signals recursive
+glob semantics the resolver does not have.
 
 Two boundary facts worth remembering:
 
@@ -138,7 +142,7 @@ happens once, when configuration loads, and applies to `read`, `edit`, and
 |---------|----------|
 | `~/projects/reference/*` | home-expanded at load time |
 | `$HOME/reference/*` | home-expanded at load time |
-| `$PWD/**` | literal text — matches nothing |
+| `$PWD/*` | literal text — matches nothing |
 | `./tests/*` | literal text — matches nothing |
 
 `{env:VAR}` substitution exists for config strings generally, but it resolves at
@@ -154,7 +158,7 @@ Path resources are not passed in one consistent form:
 - Paths outside the Location are canonical absolute (e.g. `/etc/hosts`).
 
 The permissions table states this only for `read`. Verified empirically for
-`edit`: a rule `edit tests/**` matched an in-project edit and the write applied.
+`edit`: a rule `edit tests/*` matched an in-project edit and the write applied.
 `edit` behaves the same as `read` here.
 
 Since relative paths never begin with `/`, the pair
@@ -246,11 +250,9 @@ inside a shell command, and patch target paths. It is part of permission
 evaluation; a `tool.use` policy deny is independent and still applies. See
 [plugins.md](plugins.md).
 
-## Emulating `acceptEdits`
+## The blanket-edit-allow trap
 
-OpenCode has no permission modes, but rule order reproduces Claude's
-`acceptEdits` posture. In-project paths are matched relative and external paths
-absolute, so:
+An `acceptEdits` posture looks expressible as:
 
 ```jsonc
 [
@@ -259,10 +261,26 @@ absolute, so:
 ]
 ```
 
-allows edits inside the project and asks for every absolute path. Put any
-specific external allow after the `/*` rule and every sensitive deny after both,
-because the last match wins. The `external_directory` check remains independent:
-approving a boundary does not by itself grant a read or edit.
+It is not a safe project boundary. Three facts combine against it:
+
+1. `edit *` matches absolute paths too. There is no negation and no
+   project-root variable, so no rule can say "relative only".
+2. `edit /* ask` only catches resources that begin with `/`. Windows drive
+   paths (`C:/...`) and UNC paths do not, and any resource sent relative —
+   including a `../` escape if the harness sends one — is not caught either.
+3. The `external_directory` check is the real boundary, but it is independent.
+   A saved "Allow always" for a directory writes a durable `allow`; once the
+   boundary passes, `edit * allow` grants writes inside it. The narrower
+   `/* ask` rule only helps on POSIX-absolute resources.
+
+Use explicit `edit` allows for named paths instead. If in-project auto-approval
+is required, a plugin can resolve each resource against the session directory in
+`permission.evaluate` and set the effect, but granting via a plugin hook is not
+a documented pattern and needs host testing. Asking for every edit is the
+bounded alternative.
+
+The `external_directory` check remains independent in all cases: approving a
+boundary does not by itself grant a read or edit.
 
 ## Saved approvals
 
