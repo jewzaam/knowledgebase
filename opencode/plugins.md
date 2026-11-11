@@ -134,9 +134,21 @@ whatever an existing checker reads, then maps the result back:
   exists for local files.
 
 A subprocess check must fail in a defined direction. If the interpreter or
-module is missing, either block every call or report once and allow; there is no
-loader-level fail-closed default. Note that `spawnSync` blocks the event loop
-for the check's duration.
+module is missing, there is no loader-level default. The rejection path is the
+one Claude-style behavior: throw from `tool.execute.before`, or set
+`effect = "deny"` and `message` in `permission.evaluate`. The tool call fails,
+the model receives the error text, and it can choose another path. Fail-closed
+is the only option that gives the model a rejection to react to. Note that
+`spawnSync` blocks the event loop for the check's duration.
+
+`console.error` goes to the server log, not the conversation. A non-blocking
+warning can be surfaced with
+`ctx.session.synthetic({ sessionID, text, delivery, resume })`: it enters the
+session inbox and transcript, but it is not a rejection. `resume` defaults to
+true and wakes the session; `resume: false` queues the message until the next
+wake (`@opencode/core@2.2.7`, `dist/chunks/skill-hr3yjr22.js`). The permission
+`message` field is shown only when the evaluated effect is `ask` or `deny`; it
+is not a general notification channel.
 
 ## Sources
 
