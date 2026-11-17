@@ -118,6 +118,18 @@ Both return `403`, and the JSON body says which layer refused:
 
 `sandbox exec` TTY sessions drop during idle periods. `--timeout 0` is the default (no timeout), so it is not an exec-level timeout. The gRPC stream between CLI and gateway/supervisor is suspected of being reaped. No keepalive configuration is exposed. Workaround: background process writing ENQ byte to stdout every 30s.
 
+### Exec stdin is buffered until EOF
+
+`sandbox exec` does not stream stdin to the remote command. It reads stdin to EOF and only then launches the command. Measured with `{ printf a; sleep 2; printf b; } | openshell sandbox exec --name <sb> -- cat`: both bytes arrived together after the 2 second sleep, 1.2 ms apart. A plain `printf 'hi\n' | ... -- cat` returns output normally, so the command does run and its output does come back — the difference is timing, not capability.
+
+The documented 4 MiB stdin ceiling (`stdin payload exceeds 4194304 byte limit`) is consistent with this buffering — a buffer size, not a cap layered on a live stream.
+
+Consequence: any request/response protocol carried over the exec stream deadlocks, because neither side can proceed until the other finishes writing. rsync over exec is the concrete case — a wrapper that discards rsync's hostname argument and runs `openshell sandbox exec --name <sb> -- "$@"` hangs in both directions. Push writes the file list and changed bytes to stdin; pull's local receiver keeps its stdin open for checksums; exec launches nothing until EOF. `rsync -avn` produced no output within a 15 second timeout.
+
+Bulk file movement belongs on `openshell sandbox upload` and `openshell sandbox download`, which take a path and a destination and manage the transfer themselves. Exec suits one-shot commands whose stdin is small: `find`, `tar`, `mkdir`, `rm`, `test`, `bash -c`.
+
+Only stdin buffering has been measured. Nothing is established about stdout streaming itself; the delayed output above is explained by the remote `cat` receiving nothing until EOF, not by output buffering.
+
 ## Network Policy Discovery
 
 No container-side policy file exists in a current sandbox at `/etc/openshell/policy.yaml` — that path does not exist; `/etc/openshell/` contains only `auth/` and `tls/` subdirectories. A session cannot read its own effective policy from inside the container unless something outside places a copy there (e.g., `/sandbox/source/openshell-policy.yaml`, uploaded from the host per the project's own `CLAUDE.md`). The host can still inject **additional** policy entries beyond any uploaded copy — the proxy enforces the union — so an uploaded policy file should not be trusted as exhaustive; verify access empirically.
