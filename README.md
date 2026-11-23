@@ -66,6 +66,7 @@ This project's discoveries live in the [Knowledgebase](https://github.com/jewzaa
 | [OTEL Native Telemetry](claude-code/otel-native-telemetry.md) | Native OTEL event types, labels, query_source taxonomy, session state derivation signals |
 | [Skills](claude-code/skills.md) | Permission enforcement detail, shell injection mechanics |
 | [Workflow Structured Output](claude-code/workflow-structured-output.md) | Workflow `args` global failure, `agent(schema:)` mechanism, Ajv validation, schema constraints |
+| [Headless stream-json Sessions](claude-code/headless-stream-json-sessions.md) | Persistent `claude -p` session, context size from last API call, AskUserQuestion control requests, `--session-id`/`--resume` errors, `--strict-mcp-config`, usage-limit windows |
 | [WebSearch and Sub-Agent Tools](claude-code/websearch-and-subagent-tools.md) | WebSearch server-side execution vs WebFetch client-side egress, per-session search budget, non-verbatim results, sub-agent permission-prompt visibility, Bash output visibility |
 
 ## [Codex CLI](codex-code/)
@@ -88,6 +89,7 @@ This project's discoveries live in the [Knowledgebase](https://github.com/jewzaa
 | [Git Remote Discovery](common/git-remote-discovery.md) | Why `origin`/`upstream` are conventions not contracts |
 | [Mermaid Rendering](common/mermaid-rendering.md) | Node placement via connections, style color inheritance, subgraph nesting contrast, legend rendering, label quoting |
 | [GNU tar mtime Handling](common/tar-mtime.md) | Default format stores whole-second mtimes (extraction truncates nanoseconds), `--newer` tests mtime or ctime while `--newer-mtime` tests mtime only, filtering without traversal effect, consequences for mtime-based delta transfers |
+| [Windows 11 and PowerShell 5.1](common/windows-11-and-powershell-5-1.md) | Windows 11 Home gaps, `conhost --headless`, whisper.cpp on Windows, PowerShell 5.1 traps |
 | [VS Code / GNOME Window Calls](common/vscode-gnome-window-calls.md) | `wm_class` is `com.microsoft.VSCode` not `code`; shared pid across windows makes terminal-tab attribution unobservable; `List` response shape, null-title guard, title-to-workspace extraction; `gdbus` vs `psutil.children(recursive=True)` call cost |
 
 ## [Containers](containers/)
@@ -99,10 +101,17 @@ This project's discoveries live in the [Knowledgebase](https://github.com/jewzaa
 | [Podman Rootless Networking](containers/podman-rootless-networking.md) | Pasta TAP vs interface-copy mode, rootless-netns debugging, bridge data path, pasta version regressions |
 | [Terminal Multiplexers in Sandboxes](containers/terminal-multiplexers-in-sandboxes.md) | screen/tmux/dtach inside Landlock-enforced sandboxes: `/dev/pts` PTY fix, terminal emulation vs Claude Code TUI, dtach raw passthrough as working solution |
 
+## [Discord](discord/)
+
+| Doc | Description |
+|---|---|
+| [Bot REST API](discord/bot-rest-api.md) | Send/reaction endpoints, headers, limits, permission bits, intents, polls, voice messages |
+
 ## [.NET](dotnet/)
 
 | Doc | Description |
 |---|---|
+| [Windows UI Testing](dotnet/windows-ui-testing.md) | FlaUI.UIA3, xUnit v3 parallelization, WinForms AccessibleName |
 | [NINA Plugin](dotnet/nina-plugin.md) | NINA 3.x C# plugin: build, MEF, mediators, options, HTTP, logging, publishing |
 
 ## [Kubernetes](kubernetes/)

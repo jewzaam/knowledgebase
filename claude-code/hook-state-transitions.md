@@ -198,6 +198,31 @@ No `SessionEnd` hook fires on crash. Detect via PID polling.
 Hooks may fire with the original session ID rather than the new one. Match by
 CWD as a fallback.
 
+### Stop does not fire on API errors or usage limits
+
+`Stop` does not fire when a turn ends on an API error or a usage limit.
+`StopFailure` fires instead, with `error` and `last_assistant_message` in its
+input. The `Stop` input carries `stop_hook_active` and `background_tasks`.
+Claude Code overrides a `Stop` hook after 8 consecutive blocks without a tool
+call in between.
+
+### UserPromptSubmit also fires for channel and injected input
+
+`UserPromptSubmit` fires for channel messages and injected notifications as
+well as typed prompts.
+
+### Hook cwd and sub-agent calls
+
+Sub-agent tool calls carry `agent_id` in the hook input. The hook `cwd` is the
+session's cwd, not the project the tool call touches. MCP tool matchers take
+the form `mcp__<server>__<tool>`.
+
+### A hook that cannot start fails open
+
+A hook command that cannot start (for example `node` missing from a stale
+`PATH`) is a non-blocking error, so a guard hook then lets the action through.
+An absolute interpreter path avoids this.
+
 ### Out-of-order completion
 
 Agents can complete in any order regardless of start order. Handle interleaved

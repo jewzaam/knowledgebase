@@ -62,7 +62,8 @@ When adding a new knowledgebase doc:
 ## Claude Code
 
 - [claude-code/agent-sdk-usage-data.md](claude-code/agent-sdk-usage-data.md) — extracting cost, token, context, and rate-limit data from the Agent SDK
-- [claude-code/hook-state-transitions.md](claude-code/hook-state-transitions.md) — hook event types, state machines, configuration
+- [claude-code/headless-stream-json-sessions.md](claude-code/headless-stream-json-sessions.md) — `claude -p` stream-json persistent session (one process, many messages, mid-turn folding), context size from the last API call, AskUserQuestion via `--permission-prompt-tool stdio`, `--session-id` vs `--resume` errors, plugin MCP servers and `--strict-mcp-config`, variadic `--channels`, what bypass mode still prompts for, usage-limit windows and status line fields, sub-agent model resolution order
+- [claude-code/hook-state-transitions.md](claude-code/hook-state-transitions.md) — hook event types, state machines, configuration, `Stop` vs `StopFailure`, fail-open on unstartable hooks
 - [claude-code/model-restrictions.md](claude-code/model-restrictions.md) — `availableModels` allowlist scope and entry matching, managed-only `deniedModels`, `enforceAvailableModels` scope conflict, the Default picker row, precedence chain, gateway discovery `claude`/`anthropic` substring filter, `modelOverrides` key rules
 - [claude-code/oauth-tokens.md](claude-code/oauth-tokens.md) — Anthropic OAuth token taxonomy, endpoint compatibility, error-envelope quirks, `~/.claude.json` auth-file requirement, K8s Secret tmpfs reset
 - [claude-code/plugins.md](claude-code/plugins.md) — plugin caching, env vars, marketplace mechanics
@@ -99,6 +100,7 @@ When adding a new knowledgebase doc:
 - [common/git-remote-discovery.md](common/git-remote-discovery.md) — why `origin`/`upstream` are conventions not contracts
 - [common/mermaid-rendering.md](common/mermaid-rendering.md) — Mermaid rendering behaviors: node placement via connections, style color inheritance, subgraph nesting contrast, legend rendering, label quoting
 - [common/tar-mtime.md](common/tar-mtime.md) — GNU tar mtime handling: default format stores whole seconds (extraction truncates nanoseconds), `--newer` tests mtime or ctime while `--newer-mtime` tests mtime only, filtering does not affect directory traversal, consequences for mtime-based delta transfers
+- [common/windows-11-and-powershell-5-1.md](common/windows-11-and-powershell-5-1.md) — Windows 11 Home missing features, `conhost --headless`, whisper-cli VC runtime exit code, Autologon, whisper.cpp Windows releases/model speed, PowerShell 5.1 ExitCode/stderr/BOM/alias traps
 - [common/vscode-gnome-window-calls.md](common/vscode-gnome-window-calls.md) — GNOME `window-calls` extension facts for VS Code windows: `wm_class` is `com.microsoft.VSCode` not `code`, shared pid across windows making terminal-tab attribution unobservable, `List` response shape and null-title guard, title-to-workspace extraction, `gdbus` vs `psutil.children(recursive=True)` call cost
 
 Standards counterpart: [standards/common/documentation-diagrams.md](https://github.com/jewzaam/standards/blob/main/common/documentation-diagrams.md) — prescriptive rules for diagram structure
@@ -109,8 +111,13 @@ Standards counterpart: [standards/common/documentation-diagrams.md](https://gith
 - [containers/podman-rootless-networking.md](containers/podman-rootless-networking.md) — pasta TAP vs interface-copy mode, rootless-netns debugging, bridge data path, pasta version regressions
 - [containers/terminal-multiplexers-in-sandboxes.md](containers/terminal-multiplexers-in-sandboxes.md) — screen/tmux/dtach inside Landlock-enforced sandboxes: `/dev/pts` PTY fix, terminal emulation vs Claude Code TUI, dtach raw passthrough as working solution
 
+## Discord
+
+- [discord/bot-rest-api.md](discord/bot-rest-api.md) — message send and reaction endpoints, required headers and limits, permission bits, invite URL, Message Content intent, poll limits, voice message format
+
 ## .NET
 
+- [dotnet/windows-ui-testing.md](dotnet/windows-ui-testing.md) — FlaUI.UIA3 on net10.0-windows, xUnit v3 missing `Parallelization` attribute, WinForms `AccessibleName` as UIA Name
 - [dotnet/nina-plugin.md](dotnet/nina-plugin.md) — NINA 3.x C# plugin: build, MEF, mediators, options, HTTP, logging, publishing
 
 ## Kubernetes
