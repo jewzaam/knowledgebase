@@ -30,7 +30,7 @@ emoji URL-encoded.
 
 ## Bot invite URL
 
-```
+```text
 https://discord.com/oauth2/authorize?client_id=<id>&scope=bot&permissions=<int>
 ```
 
@@ -48,6 +48,6 @@ characters; multi-select supported.
 Voice messages arrive as ogg/opus attachments. Converting to 16 kHz mono WAV
 with ffmpeg prepares them for whisper.cpp:
 
-```
+```bash
 ffmpeg -i voice.ogg -ar 16000 -ac 1 voice.wav
 ```

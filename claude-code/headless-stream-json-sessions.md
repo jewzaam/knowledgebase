@@ -4,7 +4,7 @@ Observed with Claude Code 2.1.x on Windows 11 Home, plus official documentation.
 
 ## One process, one session, many messages
 
-```
+```bash
 claude -p --input-format stream-json --output-format stream-json --verbose
 ```
 
@@ -59,7 +59,7 @@ Discord channel plugin then opens a second gateway connection).
 `--channels entries must be tagged`, because `plugin` and `list` are consumed as
 further entries. The `=` form ends the list:
 
-```
+```bash
 claude --channels=plugin:x@m plugin list
 ```
 
