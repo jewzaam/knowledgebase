@@ -9,7 +9,7 @@ How PixInsight 1.9.6 (Windows) behaves when driven by scripts instead of the GUI
 - Script `console` output does not reach stdout. Log to a file from the script.
 - A script that throws before its own try/catch exits with code 0 and no message. Wrap everything, and write a log line first.
 - `File.openForWriting` on an existing path followed by `seekEnd` failed silently for appending; create one new log file per run instead. A file PixInsight holds open for writing cannot be read from outside until the process exits.
-- `ImageWindow.open(path)[0]`, `view.beginProcess()` / `endProcess()`, `Image.cropBy(-l, -t, -r, -b)` (negative = remove pixels) and `window.saveAs(path, false, false, false, false)` worked. The `Crop` process object raised a bare `Error` from `executeOn` on a solved image.
+- `ImageWindow.open(path)` (first element of the returned array), `view.beginProcess()` / `endProcess()`, `Image.cropBy(-l, -t, -r, -b)` (negative = remove pixels) and `window.saveAs(path, false, false, false, false)` worked. The `Crop` process object raised a bare `Error` from `executeOn` on a solved image.
 - `#define` constants from `pjsr/*.jsh` headers are preprocessor macros, not variables: they exist in the script text only after preprocessing. Code loaded with `eval` at run time sees none of them. Substituting their values into the text first works. `UndoFlag_NoSwapFile` is not a usable name in `beginProcess`; call `beginProcess()` without it.
 - A run folder that already exists from an earlier run caused a rerun with the same output id to do nothing and exit 0.
 
