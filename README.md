@@ -104,7 +104,7 @@ This project's discoveries live in the [Knowledgebase](https://github.com/jewzaa
 
 | Doc | Description |
 |---|---|
-| [Gaia TAP Star Counts](astro/gaia-tap.md) | Querying Gaia DR3 star counts through the ESA TAP service: box search, query limits, error handling |
+| [Gaia TAP Star Counts](astro/gaia-tap.md) | Querying Gaia DR3 star counts through the ESA TAP service: request shape, box search, which ADQL forms failed |
 
 ## [Kubernetes](kubernetes/)
 
