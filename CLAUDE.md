@@ -47,6 +47,10 @@ When adding a new knowledgebase doc:
 4. If the topic has a prescriptive companion in standards, cross-link both ways
 5. Run `make test-reachability` to confirm
 
+## Astrophotography
+
+- [astrophotography/pixinsight-headless-automation.md](astrophotography/pixinsight-headless-automation.md) — PixInsight 1.9.6 headless runs: `--automation-mode --run` flags and settings slots, silent-failure traps in PJSR scripts, `#define` macros vs `eval`, loading the Canon Banding Reduction engine without its dialog, RC-Astro BlurX/NoiseX/StarX parameters and CPU timings, PixelMath `symbols`, MMT layer array, near-zero stars layers, GUI automation on scaled displays
+
 ## Build and CI/CD
 
 - [build/ghcr-publish.md](build/ghcr-publish.md) — why fine-grained PATs fail, classic PAT scoping, OCI label linkage mechanics, first-publish-private behavior

@@ -37,6 +37,12 @@ Reference in your project:
 This project's discoveries live in the [Knowledgebase](https://github.com/jewzaam/knowledgebase).
 ```
 
+## [Astrophotography](astrophotography/)
+
+| Doc | Description |
+|---|---|
+| [PixInsight headless automation](astrophotography/pixinsight-headless-automation.md) | Running PixInsight 1.9.6 scripts without the GUI: command-line flags, settings slots, PJSR gotchas, loading the Canon Banding Reduction engine, RC-Astro BlurX/NoiseX/StarX timings and parameters, PixelMath symbols, MMT layers, stars-layer behaviour, UI Automation and DPI traps |
+
 ## [Build and CI/CD](build/)
 
 | Doc | Description |
