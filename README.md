@@ -58,6 +58,7 @@ This project's discoveries live in the [Knowledgebase](https://github.com/jewzaa
 | Doc | Description |
 |---|---|
 | [Agent SDK Usage Data](claude-code/agent-sdk-usage-data.md) | Extracting cost, token, context, and rate-limit data from the Agent SDK |
+| [Headless Session IDs](claude-code/headless-session-ids.md) | `claude -p --session-id` chooses the id, `--resume` continues it |
 | [Hook State Transitions](claude-code/hook-state-transitions.md) | Hook event types, state machines, and configuration |
 | [Model Restrictions](claude-code/model-restrictions.md) | `availableModels` allowlist scope and prefix matching, managed-only `deniedModels`, `enforceAvailableModels` scope conflict, the Default picker row and why no key hides it, precedence chain, gateway discovery `claude`/`anthropic` substring filter, `modelOverrides` key rules |
 | [OAuth Tokens](claude-code/oauth-tokens.md) | Anthropic OAuth token taxonomy, endpoint compatibility, error-envelope quirks, `~/.claude.json` auth-file requirement, K8s Secret tmpfs reset |
@@ -88,6 +89,8 @@ This project's discoveries live in the [Knowledgebase](https://github.com/jewzaa
 | [gdbus GVariant Escaping](common/gdbus-gvariant-escaping.md) | gdbus GVariant double-escaping of quotes in D-Bus extension output, JSON parsing fix |
 | [Git Remote Discovery](common/git-remote-discovery.md) | Why `origin`/`upstream` are conventions not contracts |
 | [Mermaid Rendering](common/mermaid-rendering.md) | Node placement via connections, style color inheritance, subgraph nesting contrast, legend rendering, label quoting |
+| [GitHub Projects v2 and gh](common/github-projects-v2-and-gh.md) | Polling cost, single-select option replacement, view API limits, `since` filters, rate limits, `gh` quoting on PowerShell 5.1, `--attach` |
+| [PowerShell 5.1 Traps](common/powershell-5-1-traps.md) | `ConvertFrom-Json` array unrolling, case-insensitive variables, ANSI source, `Set-Content` BOM |
 | [GNU tar mtime Handling](common/tar-mtime.md) | Default format stores whole-second mtimes (extraction truncates nanoseconds), `--newer` tests mtime or ctime while `--newer-mtime` tests mtime only, filtering without traversal effect, consequences for mtime-based delta transfers |
 | [Windows 11 and PowerShell 5.1](common/windows-11-and-powershell-5-1.md) | Windows 11 Home gaps, `conhost --headless`, whisper.cpp on Windows, PowerShell 5.1 traps |
 | [VS Code / GNOME Window Calls](common/vscode-gnome-window-calls.md) | `wm_class` is `com.microsoft.VSCode` not `code`; shared pid across windows makes terminal-tab attribution unobservable; `List` response shape, null-title guard, title-to-workspace extraction; `gdbus` vs `psutil.children(recursive=True)` call cost |
