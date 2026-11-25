@@ -113,6 +113,13 @@ This project's discoveries live in the [Knowledgebase](https://github.com/jewzaa
 |---|---|
 | [Windows UI Testing](dotnet/windows-ui-testing.md) | FlaUI.UIA3, xUnit v3 parallelization, WinForms AccessibleName |
 | [NINA Plugin](dotnet/nina-plugin.md) | NINA 3.x C# plugin: build, MEF, mediators, options, HTTP, logging, publishing |
+| [NINA Sequence Files](dotnet/nina-sequence-files.md) | Generating and checking NINA 3.2 sequence JSON with NINA's own classes, instruction types, file pattern tokens, UI automation limits |
+
+## [Astro](astro/)
+
+| Doc | Description |
+|---|---|
+| [Gaia TAP Star Counts](astro/gaia-tap.md) | Querying Gaia DR3 star counts through the ESA TAP service: box search, query limits, error handling |
 
 ## [Kubernetes](kubernetes/)
 
