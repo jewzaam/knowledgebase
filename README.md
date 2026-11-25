@@ -58,7 +58,9 @@ This project's discoveries live in the [Knowledgebase](https://github.com/jewzaa
 | Doc | Description |
 |---|---|
 | [Agent SDK Usage Data](claude-code/agent-sdk-usage-data.md) | Extracting cost, token, context, and rate-limit data from the Agent SDK |
-| [Headless Session IDs](claude-code/headless-session-ids.md) | `claude -p --session-id` chooses the id, `--resume` continues it |
+| [Headless Session IDs](claude-code/headless-session-ids.md) | `claude -p --session-id` chooses the id, `--resume` continues it; busy-session behavior, resume from another cwd, kill then resume |
+| [Headless Mid-Turn Messages and Interrupt](claude-code/headless-injection-and-interrupt.md) | stream-json message folding, interrupt control request, spawn latency and cost |
+| [Headless Write Enforcement](claude-code/headless-write-enforcement.md) | `--settings` PreToolUse hooks in bypass mode, Bash hole, allowlist vs denylist |
 | [Hook State Transitions](claude-code/hook-state-transitions.md) | Hook event types, state machines, and configuration |
 | [Model Restrictions](claude-code/model-restrictions.md) | `availableModels` allowlist scope and prefix matching, managed-only `deniedModels`, `enforceAvailableModels` scope conflict, the Default picker row and why no key hides it, precedence chain, gateway discovery `claude`/`anthropic` substring filter, `modelOverrides` key rules |
 | [OAuth Tokens](claude-code/oauth-tokens.md) | Anthropic OAuth token taxonomy, endpoint compatibility, error-envelope quirks, `~/.claude.json` auth-file requirement, K8s Secret tmpfs reset |
@@ -87,6 +89,7 @@ This project's discoveries live in the [Knowledgebase](https://github.com/jewzaa
 | [Commit Conventions](common/commit-conventions.md) | Commit type taxonomy evolution from AngularJS through Angular to Conventional Commits; why `chore` and `style` persist |
 | [CRLF Line Endings Under WSL](common/crlf-wsl.md) | CRLF silently breaks bash scripts; detection via `file`, one-off `dos2unix`, durable `.gitattributes` prevention |
 | [gdbus GVariant Escaping](common/gdbus-gvariant-escaping.md) | gdbus GVariant double-escaping of quotes in D-Bus extension output, JSON parsing fix |
+| [Git Worktrees](common/git-worktrees.md) | One branch per worktree (exact error), isolation, dirty-worktree removal needs `--force` |
 | [Git Remote Discovery](common/git-remote-discovery.md) | Why `origin`/`upstream` are conventions not contracts |
 | [Mermaid Rendering](common/mermaid-rendering.md) | Node placement via connections, style color inheritance, subgraph nesting contrast, legend rendering, label quoting |
 | [GitHub Projects v2 and gh](common/github-projects-v2-and-gh.md) | Polling cost, single-select option replacement, view API limits, `since` filters, rate limits, `gh` quoting on PowerShell 5.1, `--attach` |
@@ -109,6 +112,7 @@ This project's discoveries live in the [Knowledgebase](https://github.com/jewzaa
 | Doc | Description |
 |---|---|
 | [Bot REST API](discord/bot-rest-api.md) | Send/reaction endpoints, headers, limits, permission bits, intents, polls, voice messages |
+| [Threads](discord/threads.md) | Docs-sourced: auto-unarchive, permissions, archive durations, limits, deletion |
 
 ## [.NET](dotnet/)
 
