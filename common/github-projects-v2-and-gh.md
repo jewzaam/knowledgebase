@@ -19,6 +19,16 @@ from GitHub documentation and were not run.
 - The Projects UI filter has an `updated:` qualifier with day granularity
   (docs). GraphQL `ProjectV2Item` has `updatedAt`, but `items` can only be
   ordered by POSITION (docs).
+- Verified by running it: `ProjectV2.items(query: "...")` accepts the same
+  `updated:` qualifier. With 16 items, `updated:@today` and
+  `updated:>@today-1w` returned all 16 and `updated:<@today` returned 0.
+  `updated:>@today-1h` returned 0 without an error: an unsupported unit is
+  silently treated as matching nothing, so the filter cannot poll below one
+  day.
+- Verified by running it: a Status change made only on the project board
+  (`gh project item-edit`) does not change the issue's own `updated_at`, so
+  a REST `?since=` poll of issues does not see board moves. Board column
+  changes have to be read from the project items themselves.
 
 ## Rate limiting
 
