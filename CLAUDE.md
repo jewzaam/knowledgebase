@@ -65,6 +65,9 @@ When adding a new knowledgebase doc:
 - [claude-code/headless-stream-json-sessions.md](claude-code/headless-stream-json-sessions.md) — `claude -p` stream-json persistent session (one process, many messages, mid-turn folding), context size from the last API call, AskUserQuestion via `--permission-prompt-tool stdio`, `--session-id` vs `--resume` errors, plugin MCP servers and `--strict-mcp-config`, variadic `--channels`, what bypass mode still prompts for, usage-limit windows and status line fields, sub-agent model resolution order
 - [claude-code/hook-state-transitions.md](claude-code/hook-state-transitions.md) — hook event types, state machines, configuration, `Stop` vs `StopFailure`, fail-open on unstartable hooks
 - [claude-code/headless-session-ids.md](claude-code/headless-session-ids.md) — `claude -p --session-id` chooses the id, `--resume` continues it
+- [claude-code/headless-session-ids.md](claude-code/headless-session-ids.md) — `claude -p --session-id` chooses the id, `--resume` continues it; second process on a busy id, resume from another cwd or worktree, kill mid-turn then resume
+- [claude-code/headless-injection-and-interrupt.md](claude-code/headless-injection-and-interrupt.md) — stream-json mid-turn message folding (reaction only between steps, sub-agent not cancelled), the interrupt control request (~120 ms, process survives, interrupt before the first tool loses the turn), spawn-to-init latency and haiku cost per run
+- [claude-code/headless-write-enforcement.md](claude-code/headless-write-enforcement.md) — `--settings` PreToolUse hooks in headless bypass mode, exit 2 vs JSON deny, Edit/Write matcher not covering Bash, Bash denylist bypass vs allowlist, `--disallowedTools`, untested areas
 - [claude-code/hook-state-transitions.md](claude-code/hook-state-transitions.md) — hook event types, state machines, configuration
 - [claude-code/model-restrictions.md](claude-code/model-restrictions.md) — `availableModels` allowlist scope and entry matching, managed-only `deniedModels`, `enforceAvailableModels` scope conflict, the Default picker row, precedence chain, gateway discovery `claude`/`anthropic` substring filter, `modelOverrides` key rules
 - [claude-code/oauth-tokens.md](claude-code/oauth-tokens.md) — Anthropic OAuth token taxonomy, endpoint compatibility, error-envelope quirks, `~/.claude.json` auth-file requirement, K8s Secret tmpfs reset
@@ -99,6 +102,7 @@ When adding a new knowledgebase doc:
 - [common/commit-conventions.md](common/commit-conventions.md) — commit type taxonomy evolution from AngularJS through Angular to Conventional Commits; why `chore` and `style` persist despite Angular dropping them
 - [common/crlf-wsl.md](common/crlf-wsl.md) — CRLF line endings silently break bash scripts under WSL; detection, one-off fix, and durable `.gitattributes` prevention
 - [common/gdbus-gvariant-escaping.md](common/gdbus-gvariant-escaping.md) — gdbus GVariant double-escaping of quotes in D-Bus extension output, JSON parsing fix
+- [common/git-worktrees.md](common/git-worktrees.md) — one branch per worktree (exact error), worktree isolation, removing a dirty worktree needs `--force`
 - [common/git-remote-discovery.md](common/git-remote-discovery.md) — why `origin`/`upstream` are conventions not contracts
 - [common/mermaid-rendering.md](common/mermaid-rendering.md) — Mermaid rendering behaviors: node placement via connections, style color inheritance, subgraph nesting contrast, legend rendering, label quoting
 - [common/github-projects-v2-and-gh.md](common/github-projects-v2-and-gh.md) — Projects v2 polling cost, single-select option replacement keeping item values, view API limits, `since` filters, rate-limit behavior, `gh` quoting on PowerShell 5.1, `--attach` uploads
@@ -145,6 +149,10 @@ Standards counterpart: [standards/common/documentation-diagrams.md](https://gith
 - [kubernetes/tailscale-operator.md](kubernetes/tailscale-operator.md) — Tailscale K8s operator: ClusterIP Service exposure, port=tailnet-port mapping, port 443 for portless URLs, L4 TCP passthrough (no TLS termination)
 - [kubernetes/podsecurity-restricted-pod.md](kubernetes/podsecurity-restricted-pod.md) — admission-rejection wall-of-text format and why it surfaces only at admission
 - [kubernetes/resource-limits.md](kubernetes/resource-limits.md) — CFS bandwidth controller throttling mechanics; why CPU limits hurt
+
+## Discord
+
+- [discord/threads.md](discord/threads.md) — docs-sourced thread facts: auto-unarchive on message unless locked, permissions for posting/un-archiving, `auto_archive_duration` values, name length, unstated rename/creation limits, deletion
 
 ## Observability
 
