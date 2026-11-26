@@ -108,11 +108,11 @@ Standards counterpart: [standards/common/documentation-diagrams.md](https://gith
 ## .NET
 
 - [dotnet/nina-plugin.md](dotnet/nina-plugin.md) — NINA 3.x C# plugin: build, MEF, mediators, options, HTTP, logging, publishing
-- [dotnet/nina-sequence-files.md](dotnet/nina-sequence-files.md) — NINA 3.2 sequence JSON: building it with NINA's own classes, instruction names seen, TakeManyExposures structure, binning $ref sharing, target-name file-pattern token, UI Automation cannot see tab content
 
 ## Astronomy data services
 
 - [astro/gaia-tap.md](astro/gaia-tap.md) — Gaia DR3 star counts through the ESA TAP sync endpoint: request shape, box search, which ADQL forms failed
+- [astro/nina-sequence-files.md](astro/nina-sequence-files.md) — NINA 3.2 sequence JSON: building it with NINA's own classes, instruction names seen, TakeManyExposures structure, binning $ref sharing, target-name file-pattern token, UI Automation cannot see tab content
 
 ## Kubernetes
 

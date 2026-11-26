@@ -98,13 +98,13 @@ This project's discoveries live in the [Knowledgebase](https://github.com/jewzaa
 | Doc | Description |
 |---|---|
 | [NINA Plugin](dotnet/nina-plugin.md) | NINA 3.x C# plugin: build, MEF, mediators, options, HTTP, logging, publishing |
-| [NINA Sequence Files](dotnet/nina-sequence-files.md) | Generating and checking NINA 3.2 sequence JSON with NINA's own classes, instruction types, file pattern tokens, UI automation limits |
 
 ## [Astro](astro/)
 
 | Doc | Description |
 |---|---|
 | [Gaia TAP Star Counts](astro/gaia-tap.md) | Querying Gaia DR3 star counts through the ESA TAP service: request shape, box search, which ADQL forms failed |
+| [NINA Sequence Files](astro/nina-sequence-files.md) | Generating and checking NINA 3.2 sequence JSON with NINA's own classes, instruction types, file pattern tokens, UI automation limits |
 
 ## [Kubernetes](kubernetes/)
 
