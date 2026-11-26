@@ -17,7 +17,37 @@ repeated; evidence level noted per item).
   is NOT refused: it ran a full turn in parallel.
 - UNVERIFIED: whether the parallel turn corrupts the shared transcript (both
   processes wrote it; the file was not inspected). Do not rely on `--resume`
-  as a lock.
+  as a lock. To tell whether a session is busy, use the command-line check in
+  "Finding a live session by id" below.
+
+## Id format and deterministic ids (observed)
+
+- `--session-id` accepts only a UUID. A name such as `builder-issue-36-session`
+  exits 1 with `Error: Invalid session ID. Must be a valid UUID.`
+- A UUIDv5 computed from a name is accepted (SHA-1 over the DNS namespace bytes
+  `6ba7b810-9dad-11d1-80b4-00c04fd430c8` plus the name, then version 5 and
+  variant bits set). An id can therefore be derived from a stable name such as
+  `builder:issue:36`: the same name gives the same id, different names differ.
+
+## Reusing an id (observed)
+
+- The first run with `--session-id <uuid>` works. A second `--session-id <uuid>`
+  once the transcript exists exits 1 with
+  `Error: Session ID <uuid> is already in use.`, even though the first process
+  has ended. The error therefore means "transcript exists", not "process alive".
+- `--resume <uuid>` after that works, and the resumed session remembered the
+  earlier turn (it answered a code word given in the first turn). The pattern is
+  `--session-id` once, `--resume` afterwards.
+
+## Finding a live session by id (observed)
+
+- While a headless run is active, the `claude` process command line contains the
+  session id for both `--session-id` and `--resume` runs. A live session can be
+  found by matching the id in the process command line (on Windows,
+  `Win32_Process` `CommandLine` via `Get-CimInstance`, filtered to `claude.exe`).
+- After the run ends no process remains, so no match means not running.
+- Because `--resume` on a busy id is not refused (above), this check is the only
+  signal observed for "busy".
 
 ## Resume from another directory (observed)
 
