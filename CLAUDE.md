@@ -73,6 +73,7 @@ When adding a new knowledgebase doc:
 - [claude-code/oauth-tokens.md](claude-code/oauth-tokens.md) — Anthropic OAuth token taxonomy, endpoint compatibility, error-envelope quirks, `~/.claude.json` auth-file requirement, K8s Secret tmpfs reset
 - [claude-code/plugins.md](claude-code/plugins.md) — plugin caching, env vars, marketplace mechanics
 - [claude-code/settings-json-rewrites.md](claude-code/settings-json-rewrites.md) — Claude Code rewrites `settings.json`: unknown keys survive only at the top level, nested hook/rule keys are dropped, hook command strings (and their shell comments) survive
+- [claude-code/reviews-standards-skill-headless.md](claude-code/reviews-standards-skill-headless.md) — `jewzaam-reviews` `standards` and `review` skills are slash-only (headless `claude -p "/jewzaam-reviews:standards <path>"`), findings files written after the host exits, owner gate `NOT_APPLICABLE` skipped by passing the standards path, count findings from the JSON not the chat summary
 - [claude-code/skills.md](claude-code/skills.md) — permission enforcement detail, shell injection mechanics
 - [claude-code/otel-native-telemetry.md](claude-code/otel-native-telemetry.md) — native OTEL event types, labels, query_source taxonomy, session state derivation signals
 - [claude-code/workflow-structured-output.md](claude-code/workflow-structured-output.md) — Workflow tool `args` global failure, `agent(schema:)` StructuredOutput mechanism, Ajv validation, schema constraint support matrix
