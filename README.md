@@ -67,7 +67,6 @@ This project's discoveries live in the [Knowledgebase](https://github.com/jewzaa
 | [Plugins](claude-code/plugins.md) | Plugin caching behavior, env vars, marketplace mechanics |
 | [Settings Rewrites](claude-code/settings-json-rewrites.md) | What survives a `settings.json` rewrite: top-level unknown keys yes, nested hook/rule keys no, command strings and their shell comments yes |
 | [OTEL Native Telemetry](claude-code/otel-native-telemetry.md) | Native OTEL event types, labels, query_source taxonomy, session state derivation signals |
-| [Reviews and Standards Skills Headless](claude-code/reviews-standards-skill-headless.md) | `jewzaam-reviews` slash-only skills run via `claude -p`, owner gate and its bypass, async findings files, count from JSON not chat |
 | [Skills](claude-code/skills.md) | Permission enforcement detail, shell injection mechanics |
 | [Workflow Structured Output](claude-code/workflow-structured-output.md) | Workflow `args` global failure, `agent(schema:)` mechanism, Ajv validation, schema constraints |
 | [Headless stream-json Sessions](claude-code/headless-stream-json-sessions.md) | Persistent `claude -p` session, context size from last API call, AskUserQuestion control requests, `--session-id`/`--resume` errors, `--strict-mcp-config`, usage-limit windows |
