@@ -17,6 +17,6 @@ user actions (work card #62, fixed in card #75).
   merge would test the old code.
 - A failed check sends the card to Ready with the evidence; it is a fix cycle,
   not a failed builder attempt. Verifier runs have their own counter.
-- Renaming a Projects v2 single-select option keeps its id when
-  `updateProjectV2Field` is given the full option list with each `id`, so no
+- Renaming a Projects v2 single-select option should keep its id when
+  `updateProjectV2Field` is given the full option list with each `id` (the input type has an optional `id`; unverified until the first live run), so no
   card moves (`tools\project-columns.ps1` in claude-orchestrator).
