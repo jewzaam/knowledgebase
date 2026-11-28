@@ -70,6 +70,7 @@ This project's discoveries live in the [Knowledgebase](https://github.com/jewzaa
 | [Skills](claude-code/skills.md) | Permission enforcement detail, shell injection mechanics |
 | [Workflow Structured Output](claude-code/workflow-structured-output.md) | Workflow `args` global failure, `agent(schema:)` mechanism, Ajv validation, schema constraints |
 | [Headless stream-json Sessions](claude-code/headless-stream-json-sessions.md) | Persistent `claude -p` session, context size from last API call, AskUserQuestion control requests, `--session-id`/`--resume` errors, `--strict-mcp-config`, usage-limit windows |
+| [Verify Stage Board](claude-code/verify-stage-board.md) | Why a Build-only board made builders loop on checks they cannot run, and the Verify stage that owns them |
 | [WebSearch and Sub-Agent Tools](claude-code/websearch-and-subagent-tools.md) | WebSearch server-side execution vs WebFetch client-side egress, per-session search budget, non-verbatim results, sub-agent permission-prompt visibility, Bash output visibility |
 
 ## [Codex CLI](codex-code/)
@@ -113,6 +114,7 @@ This project's discoveries live in the [Knowledgebase](https://github.com/jewzaa
 |---|---|
 | [Bot REST API](discord/bot-rest-api.md) | Send/reaction endpoints, headers, limits, permission bits, intents, polls, voice messages |
 | [Threads](discord/threads.md) | Docs-sourced: auto-unarchive, permissions, archive durations, limits, deletion |
+| [Thread Titles](discord/thread-titles.md) | Card thread titles carry no status emoji (rename quota); attention is a bell reaction |
 
 ## [.NET](dotnet/)
 

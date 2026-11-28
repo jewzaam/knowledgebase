@@ -76,6 +76,7 @@ When adding a new knowledgebase doc:
 - [claude-code/skills.md](claude-code/skills.md) — permission enforcement detail, shell injection mechanics
 - [claude-code/otel-native-telemetry.md](claude-code/otel-native-telemetry.md) — native OTEL event types, labels, query_source taxonomy, session state derivation signals
 - [claude-code/workflow-structured-output.md](claude-code/workflow-structured-output.md) — Workflow tool `args` global failure, `agent(schema:)` StructuredOutput mechanism, Ajv validation, schema constraint support matrix
+- [claude-code/verify-stage-board.md](claude-code/verify-stage-board.md) — a Verify stage for checks a builder cannot run before merge, so builders stop looping on them
 - [claude-code/websearch-and-subagent-tools.md](claude-code/websearch-and-subagent-tools.md) — WebSearch server-side execution vs WebFetch client-side egress, per-session search budget, non-verbatim results, sub-agent permission-prompt visibility, Bash output visibility
 
 ## Codex CLI
@@ -152,6 +153,7 @@ Standards counterpart: [standards/common/documentation-diagrams.md](https://gith
 
 ## Discord
 
+- [discord/thread-titles.md](discord/thread-titles.md) — card thread titles hold only `#NN [State] title`; attention is a bell reaction, not a rename
 - [discord/threads.md](discord/threads.md) — docs-sourced thread facts: auto-unarchive on message unless locked, permissions for posting/un-archiving, `auto_archive_duration` values, name length, unstated rename/creation limits, deletion
 
 ## Observability
